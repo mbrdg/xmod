@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 /**
  * @brief Options is a set of flags for program output
@@ -26,5 +27,7 @@ struct options {
  * @return int 0 if successful 
  */
 int parse_options(struct options* options, char arg[]);
+
+void options_output(const struct options* opt, const char* file_path,mode_t* old_mode,mode_t* new_mode);
 
 #endif  // HEADERS_OPTIONS_H_

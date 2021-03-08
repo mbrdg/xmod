@@ -7,7 +7,7 @@
  * @param mode Input string.
  * @return u_int8_t Mini-mask with the correspondig bits set to 1.
  */
-static u_int8_t permitions_set(char* mode) {
+static u_int8_t permissions_set(char* mode) {
     u_int8_t mode_mask = 0u;
 
     for (size_t i = 2; i < strlen(mode); ++i) {
@@ -55,7 +55,7 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
         exit(1);
     }
     
-    u_int16_t mode_mask = permitions_set(mode);
+    u_int16_t mode_mask = permissions_set(mode);
 
     struct stat file_mode;
     stat(file_path, &file_mode);
@@ -88,6 +88,7 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
         mode_mask = (~mode_mask) & file_mode.st_mode;
 
     } else if (mode[1] == '=') {
+        /* Pass the unchanged bits from the file_mode.st_mode to the mode_mask */
         for (int8_t i = 2; i >= 0; --i) {
             mode_t temp = 7u;
             
@@ -144,4 +145,10 @@ mode_t parse_mode(char* mode, char* file_path) {
             fprintf(stderr, "xmod: invalid MODE input format\n");
             exit(1);
     }
+}
+
+mode_t get_current_file_mode(const char* file_path){
+    struct stat file_mode;
+    stat(file_path, &file_mode);
+    return file_mode.st_mode;
 }

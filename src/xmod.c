@@ -20,7 +20,7 @@ int main(int argc, char *argv[], char *envp[]) {
                                .recursive = false, 
                                .verbose = false 
                             };
-        mode_t mode = 0u;
+        mode_t new_mode = 0u;
         bool mode_parsed = false;
         bool file_found = false;
         char* file_path;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
             } else if (!mode_parsed) {
                 /* MODE input parsing */
-                mode = parse_mode(argv[i], file_path);
+                new_mode = parse_mode(argv[i], file_path);
                 mode_parsed = true;
 
             } else {
@@ -48,8 +48,9 @@ int main(int argc, char *argv[], char *envp[]) {
                 exit(1);
             }
         }
-
-        chmod(file_path, mode);
+        mode_t old_mode = get_current_file_mode(file_path);
+        options_output(&opt, file_path, &old_mode, &new_mode);
+        chmod(file_path, new_mode);
         free(file_path);
     }
 

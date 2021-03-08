@@ -16,8 +16,11 @@
  * @param mode passed by the user through the command line
  * @param file_path String containing the path of the file/directory 
  *                  whose premitions will change.
+ * @param old_mode current file mode
  * @return mode_t new mode set of premissions for the input file(s).
  */
 mode_t parse_mode(char* mode, char* file_path);
+
+mode_t get_current_file_mode(const char* file_path);
 
 #endif  // HEADERS_MODE_H_
