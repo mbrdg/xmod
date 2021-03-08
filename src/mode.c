@@ -90,6 +90,7 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
     } else if (mode[1] == '=') {
         for (int8_t i = 2; i >= 0; --i) {
             mode_t temp = 7u;
+            
             if((mode_mask & (7u << i*3)) == 0) {
                 temp <<= i*3;
                 temp &= file_mode.st_mode;

@@ -42,7 +42,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
             } else {
                 /* exit error - invalid number of arguments */
-                fprintf(stderr, "xmod; invalid argument\n");
+                fprintf(stderr, "xmod: invalid argument\n");
                 fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
                 fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
                 exit(1);
