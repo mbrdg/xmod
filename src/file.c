@@ -5,8 +5,7 @@ char* parse_file(const char* arg) {
     char* ret_file_path;
 
     if (access(arg, F_OK) != -1) {
-        ret_file_path = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
-        strncpy(ret_file_path, arg, strlen(arg) + 1);
+        ret_file_path = strdup(arg);
 
     } else {
         /* exit error - cannot access error */
