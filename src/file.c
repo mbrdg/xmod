@@ -2,16 +2,18 @@
 
 /* FILE/DIR parser function */
 char* parse_file(const char* arg) {
-    char* file_path;
+    char* ret_file_path;
 
     if (access(arg, F_OK) != -1) {
-        file_path = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
-        strncpy(file_path, arg, strlen(arg) + 1);
+        ret_file_path = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strncpy(ret_file_path, arg, strlen(arg) + 1);
 
     } else {
-        fprintf(stderr, "Something"); //Alterar texto
-        exit(1);  //Invalid path
+        /* exit error - cannot access error */
+        fprintf(stderr, "xmod: cannot access '%s': %s\n", 
+                                    arg, strerror(errno));
+        exit(1);
     }
 
-    return file_path;
+    return ret_file_path;
 }

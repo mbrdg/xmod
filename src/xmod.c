@@ -10,9 +10,10 @@
 int main(int argc, char *argv[], char *envp[]) {
 
     if (argc < 3) {
+        /* exit error - invalid number of arguments */
         fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
         fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
-        exit(-1);
+        exit(1);
 
     } else {
         struct options opt = { .changes = false, 
@@ -24,21 +25,27 @@ int main(int argc, char *argv[], char *envp[]) {
         bool file_found = false;
         char* file_path;
 
-        for (size_t i = argc - 1; i >= 1; i--) {
+        for (size_t i = argc - 1; i >= 1; --i) {
             if(argv[i][0] == '-') {
+                /* [OPTIONS] input parsing */
                 parse_options(&opt, argv[i]);
 
             } else if(!file_found) {
+                /* FILE/DIR input parsing */
                 file_path = parse_file(argv[i]);
                 file_found = true;
 
             } else if (!mode_parsed) {
+                /* MODE input parsing */
                 mode = parse_mode(argv[i], file_path);
                 mode_parsed = true;
 
             } else {
-                fprintf(stderr, "Something"); //Alterar texto
-                exit(1);  //Invalid input
+                /* exit error - invalid number of arguments */
+                fprintf(stderr, "xmod; invalid argument\n");
+                fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
+                fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
+                exit(1);
             }
         }
 

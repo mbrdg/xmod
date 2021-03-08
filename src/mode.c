@@ -1,9 +1,5 @@
 #include "../headers/mode.h"
 
-#define OCTAL_LENGHT 4
-#define MAX_STR_LENGTH 5
-#define MIN_STR_LENGTH 3
-
 /**
  * @brief Creates a mini-mask to apply to the different types of users
  *        (Example) Input: "a-rx", Output: "0b00000101".
@@ -12,9 +8,9 @@
  * @return u_int8_t Mini-mask with the correspondig bits set to 1.
  */
 static u_int8_t permitions_set(char* mode) {
-    u_int16_t mode_mask = 0u;
+    u_int8_t mode_mask = 0u;
 
-    for (size_t i = 2; i < strlen(mode); i++) {
+    for (size_t i = 2; i < strlen(mode); ++i) {
         switch (mode[i]) {
             case 'r':
                 mode_mask |= 1<<2;
@@ -25,15 +21,19 @@ static u_int8_t permitions_set(char* mode) {
             case 'x':
                 mode_mask |= 1<<0;
                 break;
+
             default:
-                fprintf(stderr, "Something"); //Alterar texto
-                exit(1);  //Invalid permition
+                /* exit error - invalid premission */
+                fprintf(stderr, "xmod: invalid premission '%c'\n", mode[i]);
+                exit(1);
         }
     }
 
     return mode_mask;
 }
 
+#define MAX_STR_LENGTH 5
+#define MIN_STR_LENGTH 3
 /**
  * @brief Parses the new mode for file/directory passed as a normal string 
  *        format.
@@ -45,12 +45,14 @@ static u_int8_t permitions_set(char* mode) {
  */
 static mode_t parse_mode_str(char* mode, char* file_path) {
     if (strlen(mode) > MAX_STR_LENGTH || strlen(mode) < MIN_STR_LENGTH) {
-        fprintf(stderr, "Something"); //Alterar texto
-        exit(1);  //Invalid str mode size
+        /* exit error - invalid MODE string size */
+        fprintf(stderr, "xmod: invalid MODE string size\n");
+        exit(1);
     }
     if (mode[1] != '-' && mode[1] != '=' && mode[1] != '+') {
-        fprintf(stderr, "Something"); //Alterar texto
-        exit(1);  //Invalid str mode signal
+        /* exit error - invalid MODE operand */
+        fprintf(stderr, "xmod: invalid MODE operand '%c'\n", mode[1]);
+        exit(1);
     }
     
     u_int16_t mode_mask = permitions_set(mode);
@@ -59,14 +61,23 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
     stat(file_path, &file_mode);
     
     switch (mode[0]) {
-        case 'a':
-            mode_mask = (mode_mask << 6) | (mode_mask << 3) | mode_mask;
-            break;
-        case 'u':
-            mode_mask = (mode_mask << 6);
+        case 'o':
+            /* 
+             *  'Other' bit field come already set from permissions_set().
+             *  No need to make changes!
+             */
             break;
         case 'g':
+            /* 'Group' bit field set according to the new mask */
             mode_mask = (mode_mask << 3);
+            break;
+        case 'u':
+            /* 'User' bit field set according to the new mask */
+            mode_mask = (mode_mask << 6);
+            break;
+        case 'a':
+            /* U, G, and O bit fields set according to the new mask */
+            mode_mask = (mode_mask << 6) | (mode_mask << 3) | mode_mask;
             break;
     }
     
@@ -77,9 +88,9 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
         mode_mask = (~mode_mask) & file_mode.st_mode;
 
     } else if (mode[1] == '=') {
-        for (int i = 2; i >= 0; i--) {
-            mode_t temp = 7;
-            if((mode_mask & (7 << i*3)) == 0) {
+        for (int8_t i = 2; i >= 0; --i) {
+            mode_t temp = 7u;
+            if((mode_mask & (7u << i*3)) == 0) {
                 temp <<= i*3;
                 temp &= file_mode.st_mode;
                 mode_mask |= temp;
@@ -90,6 +101,7 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
     return (mode_t) mode_mask;
 }
 
+#define OCTAL_LENGHT 4
 /**
  * @brief Parses the new mode for file/directory passed as an octal string 
  *        format.
@@ -99,18 +111,21 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
  */
 static mode_t parse_mode_octal(char* mode) {
     if(strlen(mode) != OCTAL_LENGHT) {
-        fprintf(stderr, "Something"); //Alterar texto
-        exit(1);  //Invalid octal mode
+        goto invalid_octal_format;
     }
 
-    for (size_t i = 1; i < OCTAL_LENGHT; i++) {
+    for (size_t i = 1; i < OCTAL_LENGHT; ++i) {
         if (!isdigit(mode[i]) || mode[i] >= '8') {
-            fprintf(stderr, "Something");  //Alterar texto
-            exit(1);  //Invalid octal mode
+            goto invalid_octal_format;
         }
     }
-    
-    return (mode_t) strtol(mode,0,8);
+
+    return (mode_t) strtol(mode, NULL, 8);
+
+invalid_octal_format:
+    /* Invalid MODE-OCTAL string format */
+    fprintf(stderr, "xmod: invalid MODE-OCTAL input format\n");
+    exit(1);
 }
 
 /* Mode Parser Entry Function */
@@ -124,7 +139,8 @@ mode_t parse_mode(char* mode, char* file_path) {
         case 'o':
             return parse_mode_str(mode, file_path);
         default:
-            fprintf(stderr, "Something"); //Alterar texto
-            exit(1);  //Invalid mode
+            /* Invalid MODE string format */
+            fprintf(stderr, "xmod: invalid MODE input format\n");
+            exit(1);
     }
 }

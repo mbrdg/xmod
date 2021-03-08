@@ -17,8 +17,9 @@ int parse_options(struct options* opt, char* arg) {
                 break;
             
             default:
-                fprintf( stderr, "xmod: Invalid Option [c,R,v]\n");
-                exit(1); //Exit error (invalid option)
+                /* exit error - invalid option */
+                fprintf(stderr, "xmod: invalid option -- '%s'\n", arg);
+                exit(1);
         }
     }
 
