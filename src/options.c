@@ -1,6 +1,6 @@
 #include "../headers/options.h"
 
-// [Options] parser function
+/* [Options] parser function */
 int parse_options(struct options* opt, char* arg) {
     for (size_t i = 1; i < strlen(arg); ++i) {
         switch (arg[i]) {

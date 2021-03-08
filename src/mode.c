@@ -113,7 +113,7 @@ static mode_t parse_mode_octal(char* mode) {
     return (mode_t) strtol(mode,0,8);
 }
 
-// Mode Parser Entry Function
+/* Mode Parser Entry Function */
 mode_t parse_mode(char* mode, char* file_path) {
     switch (mode[0]) {
         case '0':

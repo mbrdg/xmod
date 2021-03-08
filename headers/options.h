@@ -8,17 +8,18 @@
 #include <stdlib.h>
 
 /**
- * @brief 
+ * @brief Options is a set of flags for program output
  * 
  */
 struct options {
-    bool recursive;
-    bool verbose;
-    bool changes;
+    bool recursive;     /* Option for Recursive Strategy */
+    bool verbose;       /* Option for verbose - prints all the ocorrences */
+    bool changes;       /* Option for changes - prints only the changes */
 };
 
 /**
- * @brief Options handler, checks the validation of the options and activates the struct flags passed in argument.
+ * @brief Options handler, checks the validation of the options and activates 
+ *        the struct flags passed in argument.
  * 
  * @param options Struct to activate certain options
  * @param arg Options passed through command line

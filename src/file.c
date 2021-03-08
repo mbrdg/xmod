@@ -1,6 +1,6 @@
 #include "../headers/file.h"
 
-// FILE/DIR parser function
+/* FILE/DIR parser function */
 char* parse_file(const char* arg) {
     char* file_path;
 
