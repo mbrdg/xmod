@@ -7,11 +7,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct {
+/**
+ * @brief 
+ * 
+ */
+struct options {
     bool recursive;
     bool verbose;
     bool changes;
-} options_t;
+};
 
 /**
  * @brief Options handler, checks the validation of the options and activates the struct flags passed in argument.
@@ -20,6 +24,6 @@ typedef struct {
  * @param arg Options passed through command line
  * @return int 0 if successful 
  */
-int parse_options(options_t* options, char arg[]);
+int parse_options(struct options* options, char arg[]);
 
 #endif  // HEADERS_OPTIONS_H_

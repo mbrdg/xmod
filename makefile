@@ -2,7 +2,7 @@ CC=gcc
 
 # If you wish, comment the last 3 flags
 # However, the remainder is to always resolve the compiler warnings
-CFLAGS=-g -Wall # -Werror -Wextra -pendatic
+CFLAGS=-g -Wall -Wextra # -Werror -pedantic
 
 BUILD_DIR = ./build
 SRC_DIR = ./src
