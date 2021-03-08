@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <errno.h>
 
 typedef struct {
     bool r;

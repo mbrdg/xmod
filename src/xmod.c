@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "../headers/options.h"
 #include "../headers/mode.h"
-#include <unistd.h>
+#include "../headers/file.h"
 
 #define INVALID_NUMBER_ARGUMENTS -1
 
@@ -26,14 +26,8 @@ int main(int argc, char *argv[], char *envp[]) {
                 mode = parse_mode(argv[i]);
                 mode_parsed=true;
             } else if(!file_found){
-                if(access(argv[i],F_OK)==0){
-                    file_found=true;
-                    file_path=malloc(sizeof(char)*(strlen(argv[i])+1));
-                    file_path=argv[i];
-                }else{
-                    fprintf(stderr, "Something"); //Alterar texto
-                    exit(1);  //Invalid path
-                }
+                file_path=parse_file(argv[i]);
+                file_found=true;
             } else{
                 fprintf(stderr, "Something"); //Alterar texto
                 exit(1);  //Invalid input
