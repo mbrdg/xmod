@@ -8,11 +8,12 @@
 #define X_VALUE 1
 
 
-static mode_result_t parse_mode_octal(char mode[]) {
+static mode_t parse_mode_octal(char mode[]) {
     if(strlen(mode)!=OCTAL_LENGHT){
         fprintf(stderr, "Something"); //Alterar texto
         exit(1);  //Invalid octal mode
     }
+
     for (size_t i = 1; i < OCTAL_LENGHT; i++)
     {
         if( !isdigit(mode[i]) || mode[i]>='8'){
@@ -20,44 +21,47 @@ static mode_result_t parse_mode_octal(char mode[]) {
             exit(1);  //Invalid octal mode
         }
     }
-    mode_result_t result= { .mode=atoi(mode), .signal='='};
-    return result;
+    return (mode_t)strtol(mode,0,8);
 }
 
-static mode_result_t parse_mode_str(char mode[]) {
-    if(strlen(mode)>MAX_STR_LENGTH || strlen(mode)<MIN_STR_LENGTH){
-        fprintf(stderr, "Something"); //Alterar texto
-        exit(1);  //Invalid str mode size
-    }
-    permitions_t permitions = {.r=false, .w=false, .x=false };
-    mode_t mode_mask=0u;
+static unsigned char permitions_set(char mode[]){
+    unsigned char mode_mask=0;
     for (size_t i = 2; i < strlen(mode); i++)
     {
         switch (mode[i])
         {
         case 'r':
-            if(!permitions.r){
-                permitions.r=true;
-                mode_mask+=R_VALUE;
-            }
+            mode_mask|=1<<2;
             break;
         case 'w':
-            if(!permitions.w){
-                permitions.w=true;
-                mode_mask+=W_VALUE;
-            }
+            mode_mask|=1<<1;
             break;
         case 'x':
-            if(!permitions.x){
-                permitions.x=true;
-                mode_mask+=X_VALUE;
-            }
+            mode_mask|=1<<0;
             break;
         default:
             fprintf(stderr, "Something"); //Alterar texto
             exit(1);  //Invalid permition
         }
     }
+    return mode_mask;
+}
+
+static mode_t parse_mode_str(char mode[], char file_path[]) {
+    if(strlen(mode)>MAX_STR_LENGTH || strlen(mode)<MIN_STR_LENGTH){
+        fprintf(stderr, "Something"); //Alterar texto
+        exit(1);  //Invalid str mode size
+    }
+    if(mode[1]!='-' && mode[1]!='=' && mode[1]!='+'){
+        fprintf(stderr, "Something"); //Alterar texto
+        exit(1);  //Invalid str mode signal
+    }
+    
+    unsigned short mode_mask = permitions_set(mode);
+
+    struct stat file_mode;
+    stat(file_path,&file_mode);
+    
     switch (mode[0])
     {
     case 'a':
@@ -70,16 +74,28 @@ static mode_result_t parse_mode_str(char mode[]) {
         mode_mask=(mode_mask<<3);
         break;
     }
-    if(mode[1]!='-' && mode[1]!='=' && mode[1]!='+'){
-        fprintf(stderr, "Something"); //Alterar texto
-        exit(1);  //Invalid str mode signal
+    
+    if(mode[1]=='+'){
+        mode_mask|=file_mode.st_mode;
+    }else if(mode[1]=='-'){
+        mode_mask=(~mode_mask) & file_mode.st_mode;
+    }else if(mode[1]=='='){
+        mode_t temp;
+        for (int i = 2; i >= 0; i--)
+        {
+            temp=7;
+            if((mode_mask&(7<<i*3))==0){
+                temp=temp<<i*3;
+                temp&=file_mode.st_mode;
+                mode_mask|=temp;
+            }
+        }
     }
-    mode_result_t result = { .mode=mode_mask, .signal=mode[1] };
-    return result;
+    return (mode_t)mode_mask;
 }
 
 
-mode_result_t parse_mode(char mode[]){
+mode_t parse_mode(char mode[],char file_path[]){
 
     switch (mode[0])
     {
@@ -89,7 +105,7 @@ mode_result_t parse_mode(char mode[]){
     case 'u':
     case 'g':
     case 'o':
-        return parse_mode_str(mode);
+        return parse_mode_str(mode, file_path);
     
     default:
         fprintf(stderr, "Something"); //Alterar texto
@@ -97,27 +113,3 @@ mode_result_t parse_mode(char mode[]){
     }
 }
 
-int update_mode(char file_path[],mode_result_t *mode){
-    struct stat file_mode;
-    
-    if(stat(file_path,&file_mode)<0){ return 1;}
-
-    if(mode->signal=='+'){
-        mode->mode|=file_mode.st_mode;
-    }else if(mode->signal=='='){
-        mode_t test=mode->mode|=0770;
-        test|=file_mode.st_mode;
-        mode->mode|=file_mode.st_mode;
-    }
-
-    printf("%o\n",file_mode.st_mode);
-    printf("%o\n",mode->mode);
-    //if(mode->mode>)
-
-    if(mode->mode>63) mode->mode|=0077;
-    //mode_t test = file_mode.st_mode&mode->mode;  //Igualar com and
-    printf("%o",file_mode.st_mode);
-    //printf("%o",test);
-
-    return 0;
-}
