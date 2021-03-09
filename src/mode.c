@@ -7,7 +7,7 @@
  * @param mode Input string.
  * @return u_int8_t Mini-mask with the correspondig bits set to 1.
  */
-static u_int8_t permissions_set(char* mode) {
+static u_int8_t permissions_set(const char* mode) {
     u_int8_t mode_mask = 00u;
 
     for (size_t i = 2; i < strlen(mode); ++i) {
@@ -43,7 +43,7 @@ static u_int8_t permissions_set(char* mode) {
  *                  premissions.
  * @return mode_t new mode set of premissions for the input file(s).
  */
-static mode_t parse_mode_str(char* mode, char* file_path) {
+static mode_t parse_mode_str(const char* mode, char* file_path) {
     if (strlen(mode) > MAX_STR_LENGTH || strlen(mode) < MIN_STR_LENGTH) {
         /* exit error - invalid MODE string size */
         fprintf(stderr, "xmod: invalid MODE string size\n");
@@ -59,7 +59,7 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
 
     struct stat file_mode;
     stat(file_path, &file_mode);
-    
+
     switch (mode[0]) {
         case 'o':
             /* 
@@ -102,7 +102,6 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
             }
         }
     }
-
     return (mode_t) mode_mask;
 }
 
@@ -113,7 +112,7 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
  * @param mode Input mode string.
  * @return mode_t new mode set of premissions for the input FILE/DIR.
  */
-static mode_t parse_mode_octal(char* mode) {
+static mode_t parse_mode_octal(const char* mode) {
     if(strlen(mode) != OCTAL_LENGHT) {
         goto invalid_octal_format;
     }
@@ -133,7 +132,7 @@ invalid_octal_format:
 }
 
 /* MODE Parser Entry Function */
-mode_t parse_mode(char* mode, char* file_path) {
+mode_t parse_mode(const char* mode, char* file_path) {
     switch (mode[0]) {
         case '0':
             return parse_mode_octal(mode);
@@ -142,7 +141,13 @@ mode_t parse_mode(char* mode, char* file_path) {
         case 'g':
         case 'o':
             return parse_mode_str(mode, file_path);
-
+        case '+':
+        case '-':
+        case '=':{
+            char temp[MAX_STR_LENGTH] = "a";
+            strcat(temp, mode);
+            return parse_mode_str(temp, file_path);
+        }
         default:
             /* Invalid MODE string format */
             fprintf(stderr, "xmod: invalid MODE input format\n");

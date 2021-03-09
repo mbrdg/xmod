@@ -25,7 +25,7 @@ int main(int argc, char *argv[], char *envp[]) {
         char* file_path;
 
         for (size_t i = argc - 1; i >= 1; --i) {
-            if (argv[i][0] == '-') {
+            if (argv[i][0] == '-' && argv[i][1] != 'r' && argv[i][1] != 'w' && argv[i][1] != 'x') {
                 /* [OPTIONS] input parsing */
                 parse_options(&opt, argv[i]);
 

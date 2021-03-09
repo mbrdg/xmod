@@ -2,6 +2,13 @@
 
 /* [Options] parser function */
 int parse_options(struct options* opt, char* arg) {
+
+    if(strlen(arg) == 1) {
+        /* exit error - invalid option */
+        fprintf(stderr, "xmod: invalid option -- '%c'\n", arg[0]);
+        exit(1);
+    }
+
     for (size_t i = strlen(arg)-1; i >= 1; --i) {
         switch (arg[i]) {
             case 'R':

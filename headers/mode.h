@@ -20,7 +20,7 @@
  * @param old_mode current file mode.
  * @return mode_t new mode set of premissions for the input file(s).
  */
-mode_t parse_mode(char* mode, char* file_path);
+mode_t parse_mode(const char* mode, char* file_path);
 
 /**
  * @brief Gets the current FILE/DIR set of premission.
