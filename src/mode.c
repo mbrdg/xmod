@@ -81,18 +81,21 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
             break;
     }
     
-    if(mode[1] == '+') {
+    if (mode[1] == '+') {
         mode_mask |= file_mode.st_mode;
 
-    } else if(mode[1] == '-') {
+    } else if (mode[1] == '-') {
         mode_mask = (~mode_mask) & file_mode.st_mode;
 
     } else if (mode[1] == '=') {
-        /* Pass the unchanged bits from the file_mode.st_mode to the mode_mask */
+        /* 
+         * Copies the unchanged bits from the file_mode.st_mode
+         * to mode_mask - the mask that will be set to FILE/DIR input
+         */
         for (int8_t i = 2; i >= 0; --i) {
             mode_t temp = 7u;
             
-            if((mode_mask & (7u << i*3)) == 0) {
+            if ((mode_mask & (7u << i*3)) == 0) {
                 temp <<= i*3;
                 temp &= file_mode.st_mode;
                 mode_mask |= temp;
@@ -105,11 +108,10 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
 
 #define OCTAL_LENGHT 4
 /**
- * @brief Parses the new mode for file/directory passed as an octal string 
- *        format.
+ * @brief Parses the new mode for FILE/DIR passed as an octal string format.
  * 
  * @param mode Input mode string.
- * @return mode_t new mode set of premissions for the input file(s).
+ * @return mode_t new mode set of premissions for the input FILE/DIR.
  */
 static mode_t parse_mode_octal(char* mode) {
     if(strlen(mode) != OCTAL_LENGHT) {
@@ -130,7 +132,7 @@ invalid_octal_format:
     exit(1);
 }
 
-/* Mode Parser Entry Function */
+/* MODE Parser Entry Function */
 mode_t parse_mode(char* mode, char* file_path) {
     switch (mode[0]) {
         case '0':
@@ -140,6 +142,7 @@ mode_t parse_mode(char* mode, char* file_path) {
         case 'g':
         case 'o':
             return parse_mode_str(mode, file_path);
+
         default:
             /* Invalid MODE string format */
             fprintf(stderr, "xmod: invalid MODE input format\n");
@@ -147,8 +150,15 @@ mode_t parse_mode(char* mode, char* file_path) {
     }
 }
 
-mode_t get_current_file_mode(const char* file_path){
+/* Utility to get FILE/DIR current premissions */
+mode_t get_current_file_mode(const char* file_path) {
     struct stat file_mode;
-    stat(file_path, &file_mode);
+
+    if (stat(file_path, &file_mode) == -1) {
+        /* exit error - cannot access error */
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                                file_path, strerror(errno));
+        exit(errno);
+    }
     return file_mode.st_mode;
 }

@@ -1,15 +1,16 @@
 #ifndef  HEADERS_OPTIONS_H_
 #define  HEADERS_OPTIONS_H_
 
-#include <stdbool.h>
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <errno.h>
 
 /**
- * @brief Options is a set of flags for program output
+ * @brief Options is a set of flags for program output.
  * 
  */
 struct options {
@@ -22,12 +23,22 @@ struct options {
  * @brief Options handler, checks the validation of the options and activates 
  *        the struct flags passed in argument.
  * 
- * @param options Struct to activate certain options
- * @param arg Options passed through command line
- * @return int 0 if successful 
+ * @param options Struct to activate certain options.
+ * @param arg Options passed through command line.
+ * @return int 0 if successful.
  */
-int parse_options(struct options* options, char arg[]);
+int parse_options(struct options* options, char* arg);
 
-void options_output(const struct options* opt, const char* file_path,mode_t* old_mode,mode_t* new_mode);
+/**
+ * @brief Output handler, prints the information required to stdout based
+ *        on the status of the flags from struct options.
+ * 
+ * @param opt Set of flags passed as input by the command line.
+ * @param file_path String with the location of FILE/DIR modified or not.
+ * @param old_mode Previous set of file premissions.
+ * @param new_mode New set of file premissions.
+ */
+void options_output(const struct options* opt, const char* file_path, 
+                    mode_t* old_mode, mode_t* new_mode);
 
 #endif  // HEADERS_OPTIONS_H_

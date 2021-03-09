@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 
 #include "../headers/options.h"
 #include "../headers/mode.h"
@@ -26,11 +25,11 @@ int main(int argc, char *argv[], char *envp[]) {
         char* file_path;
 
         for (size_t i = argc - 1; i >= 1; --i) {
-            if(argv[i][0] == '-') {
+            if (argv[i][0] == '-') {
                 /* [OPTIONS] input parsing */
                 parse_options(&opt, argv[i]);
 
-            } else if(!file_found) {
+            } else if (!file_found) {
                 /* FILE/DIR input parsing */
                 file_path = parse_file(argv[i]);
                 file_found = true;
@@ -48,8 +47,11 @@ int main(int argc, char *argv[], char *envp[]) {
                 exit(1);
             }
         }
+
+        /* output stuff */
         mode_t old_mode = get_current_file_mode(file_path);
         options_output(&opt, file_path, &old_mode, &new_mode);
+
         chmod(file_path, new_mode);
         free(file_path);
     }

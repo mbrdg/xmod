@@ -9,7 +9,7 @@ char* parse_file(const char* arg) {
 
     } else {
         /* exit error - cannot access error */
-        fprintf(stderr, "xmod: cannot access '%s': %s\n", 
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
                                     arg, strerror(errno));
         exit(1);
     }
