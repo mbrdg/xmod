@@ -8,7 +8,7 @@
  * @return u_int8_t Mini-mask with the correspondig bits set to 1.
  */
 static u_int8_t permissions_set(char* mode) {
-    u_int8_t mode_mask = 0u;
+    u_int8_t mode_mask = 00u;
 
     for (size_t i = 2; i < strlen(mode); ++i) {
         switch (mode[i]) {
@@ -93,7 +93,7 @@ static mode_t parse_mode_str(char* mode, char* file_path) {
          * to mode_mask - the mask that will be set to FILE/DIR input
          */
         for (int8_t i = 2; i >= 0; --i) {
-            mode_t temp = 7u;
+            mode_t temp = 07u;
             
             if ((mode_mask & (7u << i*3)) == 0) {
                 temp <<= i*3;
@@ -155,10 +155,11 @@ mode_t get_current_file_mode(const char* file_path) {
     struct stat file_mode;
 
     if (stat(file_path, &file_mode) == -1) {
-        /* exit error - cannot access error */
-        fprintf(stderr, "xmod: cannot access '%s': %s\n",
-                                file_path, strerror(errno));
+        /* exit error - cannot access FILE/DIR status error */
+        fprintf(stderr, "xmod: cannot access '%s' status: %s\n",
+                                    file_path, strerror(errno));
         exit(errno);
     }
+
     return file_mode.st_mode;
 }

@@ -19,7 +19,7 @@ int main(int argc, char *argv[], char *envp[]) {
                                .recursive = false, 
                                .verbose = false 
                             };
-        mode_t new_mode = 0u;
+        mode_t new_mode = 00u;
         bool mode_parsed = false;
         bool file_found = false;
         char* file_path;
