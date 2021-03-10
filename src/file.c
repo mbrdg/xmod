@@ -3,7 +3,6 @@
 /* FILE/DIR parser function */
 char* parse_file(const char* arg) {
     char* ret_file_path;
-
     if (access(arg, F_OK) != -1) {
         ret_file_path = strdup(arg);
 
