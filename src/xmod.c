@@ -27,7 +27,6 @@ int main(int argc, char *argv[], char *envp[]) {
         char* file_path;
         int file_index=-1;
         int mode_index=-1;
-        bool change = false;
 
         for (size_t i = argc - 1; i >= 1; --i) {
             if (argv[i][0] == '-' && argv[i][1] != 'r' && argv[i][1] != 'w' && argv[i][1] != 'x') {
@@ -57,13 +56,8 @@ int main(int argc, char *argv[], char *envp[]) {
 
         /* output stuff */
         mode_t old_mode = get_current_file_mode(file_path);
-
-        if(!((old_mode & 0777) & 0444)){
-            printf("======\n");
-            new_mode = parse_mode("a+r", file_path);
-            chmod(file_path, new_mode);
-            change = true;
-        }
+        chmod(file_path, new_mode);
+        options_output(&opt, file_path, &old_mode, &new_mode);
 
         if(opt.recursive){
             DIR* directory;
@@ -109,14 +103,9 @@ int main(int argc, char *argv[], char *envp[]) {
             }
             closedir(directory);
         }
-        if(change){
-            new_mode = parse_mode("a-r", file_path);
-            chmod(file_path, new_mode);
-        }
-        chmod(file_path, new_mode);
-        options_output(&opt, file_path, &old_mode, &new_mode);
 
         free(file_path);
+        
     }
 
     
