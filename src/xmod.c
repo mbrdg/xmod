@@ -27,6 +27,7 @@ int main(int argc, char *argv[], char *envp[]) {
         char* file_path;
         int file_index=-1;
         int mode_index=-1;
+        bool change = false;
 
         for (size_t i = argc - 1; i >= 1; --i) {
             if (argv[i][0] == '-' && argv[i][1] != 'r' && argv[i][1] != 'w' && argv[i][1] != 'x') {
@@ -57,34 +58,36 @@ int main(int argc, char *argv[], char *envp[]) {
         /* output stuff */
         mode_t old_mode = get_current_file_mode(file_path);
 
+        if(!((old_mode & 0777) & 0444)){
+            printf("======\n");
+            new_mode = parse_mode("a+r", file_path);
+            chmod(file_path, new_mode);
+            change = true;
+        }
+
         if(opt.recursive){
             DIR* directory;
             struct stat stat_buf;
             struct dirent *dir;
             if((directory=opendir(file_path))!=NULL){
-                chdir(file_path);
-                
                 while ((dir=readdir(directory))!=NULL)
                 {
-                    stat(dir->d_name,&stat_buf);
-                    if((strcmp(dir->d_name,"..")!=0) && (strcmp(dir->d_name,".")!=0)){
-                        new_mode=parse_mode(argv[mode_index], dir->d_name);
-                        
-                        old_mode = get_current_file_mode(dir->d_name);
-                        chmod(dir->d_name, new_mode);
-                        char * temp_file_path=NULL;
-                        asprintf(&temp_file_path, "%s/%s",file_path,dir->d_name);
-                        printf("%d  ",getpid());
-                        options_output(&opt, temp_file_path, &old_mode, &new_mode);
+                    char * temp_file_path=NULL;
+                    asprintf(&temp_file_path, "%s/%s",file_path,dir->d_name);
+                    stat(temp_file_path,&stat_buf);
 
+                    if((strcmp(dir->d_name,"..")!=0) && (strcmp(dir->d_name,".")!=0)){
+                        new_mode=parse_mode(argv[mode_index], temp_file_path);
+                        
+                        old_mode = get_current_file_mode(temp_file_path);
                         if(S_ISDIR(stat_buf.st_mode)){
                             int pid=fork();
                             switch (pid)
                             {
                                 case 0:{
-                                    asprintf(&argv[file_index],"%s/%s",file_path,dir->d_name);
+                                    asprintf(&argv[file_index],"%s", temp_file_path);
                                     execv("./xmod",argv);
-                                    exit(0);
+                                    break;
                                 }
                                 case -1:
                                     perror("Fork()");
@@ -96,15 +99,27 @@ int main(int argc, char *argv[], char *envp[]) {
                                 }
                             }
                         }
+                        else {
+                            chmod(temp_file_path, new_mode);
+                            options_output(&opt, temp_file_path, &old_mode, &new_mode);
+                        }
+                        
                     }
                 }
             }
+            closedir(directory);
+        }
+        if(change){
+            new_mode = parse_mode("a-r", file_path);
+            chmod(file_path, new_mode);
         }
         chmod(file_path, new_mode);
         options_output(&opt, file_path, &old_mode, &new_mode);
 
         free(file_path);
     }
+
+    
 
     return 0;
 }
