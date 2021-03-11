@@ -9,7 +9,7 @@
 
 
 int main(int argc, char *argv[], char *envp[]) {
-
+    
     if (argc < 3) {
         /* exit error - invalid number of arguments */
         fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
@@ -17,6 +17,16 @@ int main(int argc, char *argv[], char *envp[]) {
         exit(1);
 
     } else {
+         //Verify log file
+        bool log_exists=(getenv("LOG_FILENAME")!= NULL);
+        //Only the process leader can truncate the file
+        if(getpid()==getpgid(getpid())){
+            //here means its the process leader
+            //Truncate and write
+            printf("Im the leader bros %d", getpid());
+        }
+
+
         struct options opt = { .changes = false, 
                                .recursive = false, 
                                .verbose = false 
