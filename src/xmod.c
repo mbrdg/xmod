@@ -57,7 +57,7 @@ int main(int argc, char *argv[], char *envp[]) {
         /* output stuff */
         mode_t old_mode = get_current_file_mode(file_path);
         chmod(file_path, new_mode);
-        options_output(&opt, file_path, &old_mode, &new_mode);
+        options_output(&opt, file_path, &old_mode, &new_mode, false);
 
         if(opt.recursive){
             DIR* directory;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 while ((dir=readdir(directory))!=NULL)
                 {
                     char * temp_file_path=NULL;
-                    asprintf(&temp_file_path, "%s/%s",file_path,dir->d_name);
+                    asprintf(&temp_file_path, "%s/%s", file_path, dir->d_name);
                     stat(temp_file_path,&stat_buf);
 
                     if((strcmp(dir->d_name,"..")!=0) && (strcmp(dir->d_name,".")!=0)){
@@ -95,20 +95,24 @@ int main(int argc, char *argv[], char *envp[]) {
                         }
                         else {
                             chmod(temp_file_path, new_mode);
-                            options_output(&opt, temp_file_path, &old_mode, &new_mode);
+                            options_output(&opt, temp_file_path, &old_mode, &new_mode, false);
                         }
                         
                     }
                 }
+
+                closedir(directory);
+
+            } else {
+                fprintf(stderr, "xmod: cannot read directory '%s': %s\n", file_path, strerror(errno));
+                options_output(&opt, file_path, &old_mode, &new_mode, true);
             }
-            closedir(directory);
         }
 
         free(file_path);
-        
+
     }
 
-    
-
     return 0;
+    
 }

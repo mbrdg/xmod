@@ -54,32 +54,51 @@ static void mode_to_str(const mode_t* mode, char* str) {
 
 /* Prints the output according to the input */
 void options_output(const struct options* opt, const char* file_path,
-                    mode_t* old_mode, mode_t* new_mode) {
+                    mode_t* old_mode, mode_t* new_mode, bool error) {
+
     /* output according to chmod only requires the last 4 digits of MODE */
     (*new_mode) = (*new_mode) & 0777;
     (*old_mode) = (*old_mode) & 0777;
+    
+    if(!error) {
 
-    /* some change was detected */
-    if ((*old_mode) != (*new_mode)) {
-        if (opt->changes || opt->verbose) {
-            char curr_mode[10];
-            char pret_mode[10];
+        /* some change was detected */
+        if ((*old_mode) != (*new_mode)) {
+            if (opt->changes || opt->verbose) {
+                char curr_mode[10];
+                char pret_mode[10];
 
-            mode_to_str(old_mode, curr_mode);
-            mode_to_str(new_mode, pret_mode);
+                mode_to_str(old_mode, curr_mode);
+                mode_to_str(new_mode, pret_mode);
 
-            printf("mode of '%s' changed from %04o (%s) to %04o (%s)\n", 
-                file_path, (*old_mode), curr_mode, (*new_mode), pret_mode);
+                fprintf(stdout, "mode of '%s' changed from %04o (%s) to %04o (%s)\n", 
+                    file_path, (*old_mode), curr_mode, (*new_mode), pret_mode);
+            }
+
+        } else {
+            if(opt->verbose) {
+                char curr_mode[10];
+
+                mode_to_str(new_mode, curr_mode);
+
+                fprintf(stdout, "mode of '%s' retained as %04o (%s)\n", 
+                            file_path, (*old_mode), curr_mode);
+            }
         }
 
     } else {
-        if(opt->verbose) {
-            char curr_mode[10];
 
-            mode_to_str(new_mode, curr_mode);
+        if (opt->verbose) {
+                char curr_mode[10];
+                char pret_mode[10];
 
-            printf("mode of '%s' retained as %04o (%s)\n", 
-                        file_path, (*old_mode), curr_mode);
+                mode_to_str(old_mode, curr_mode);
+                mode_to_str(new_mode, pret_mode);
+
+                fprintf(stderr, "failed to change mode of '%s' from %04o (%s) to %04o (%s)\n",
+                            file_path, (*old_mode), curr_mode, (*new_mode), pret_mode);
         }
+
     }
+    
 }

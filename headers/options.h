@@ -39,6 +39,6 @@ int parse_options(struct options* options, char* arg);
  * @param new_mode New set of file premissions.
  */
 void options_output(const struct options* opt, const char* file_path, 
-                    mode_t* old_mode, mode_t* new_mode);
+                    mode_t* old_mode, mode_t* new_mode, bool error);
 
 #endif  // HEADERS_OPTIONS_H_
