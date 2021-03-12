@@ -1,2 +1,14 @@
-0.000000 ; 8898 ; PROC_CREAT ; -v +t pasta1
-0.000000 ; 8898 ; PROC EXIT ; 1
+0.000000 ; 9893 ; PROC_CREAT ; -Rv 0777 pasta1
+0.000000 ; 9893 ; FILE_MODF ; pasta1 : 0777 : 0777
+0.000000 ; 9893 ; FILE_MODF ; pasta1/file1 : 0777 : 0777
+0.000000 ; 9893 ; FILE_MODF ; pasta1/file2 : 0777 : 0777
+0.000000 ; 9894 ; PROC_CREAT ; -Rv 0777 pasta1/pasta2
+0.000000 ; 9894 ; FILE_MODF ; pasta1/pasta2 : 0777 : 0777
+0.000000 ; 9894 ; FILE_MODF ; pasta1/pasta2/file4 : 0777 : 0777
+0.000000 ; 9895 ; PROC_CREAT ; -Rv 0777 pasta1/pasta2/past4
+0.000000 ; 9895 ; FILE_MODF ; pasta1/pasta2/past4 : 0777 : 0777
+0.000000 ; 9895 ; FILE_MODF ; pasta1/pasta2/past4/fil-6 : 0777 : 0777
+0.000000 ; 9895 ; PROC EXIT ; 0
+0.000000 ; 9894 ; FILE_MODF ; pasta1/pasta2/file3 : 0777 : 0777
+0.000000 ; 9894 ; PROC EXIT ; 0
+0.000000 ; 9893 ; PROC EXIT ; 0

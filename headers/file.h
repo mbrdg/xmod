@@ -23,4 +23,6 @@ void proc_creat(FILE* log_path, char** argv, size_t n, clock_t end);
 
 void prog_exit(int pid, int status);
 
+void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, int pid);
+
 #endif  // HEADERS_FILE_H_

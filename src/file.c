@@ -44,3 +44,15 @@ void prog_exit(int pid, int status) {
         fclose(log_file);
     }
 }
+
+void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, int pid){
+    if(log_path!=NULL){
+        FILE* log_file = fopen(log_path,"a");
+        char* temp;
+        old_mode &= 0777;
+        clock_t end = clock();
+        asprintf(&temp,"%f ; %d ; FILE_MODF ; %s : %04o : %04o\n", (double)((end-begin)/(CLOCKS_PER_SEC*1000)), pid, file_path, old_mode, new_mode);
+        fwrite(temp, sizeof(char), strlen(temp), log_file);
+        fclose(log_file);
+    }
+}

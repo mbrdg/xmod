@@ -76,6 +76,7 @@ int main(int argc, char *argv[], char *envp[]) {
         /* output stuff */
         mode_t old_mode = get_current_file_mode(file_path);
         chmod(file_path, new_mode);
+        file_modf(file_path, old_mode, new_mode, getpid());
         options_output(&opt, file_path, &old_mode, &new_mode, false);
 
         if(opt.recursive){
@@ -117,6 +118,7 @@ int main(int argc, char *argv[], char *envp[]) {
                         }
                         else {
                             chmod(temp_file_path, new_mode);
+                            file_modf(temp_file_path, old_mode, new_mode, getpid());
                             options_output(&opt, temp_file_path, &old_mode, &new_mode, false);
                         }
                         
