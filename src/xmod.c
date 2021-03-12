@@ -17,13 +17,19 @@ int main(int argc, char *argv[], char *envp[]) {
         exit(1);
 
     } else {
-         //Verify log file
-        bool log_exists=(getenv("LOG_FILENAME")!= NULL);
-        //Only the process leader can truncate the file
-        if(getpid()==getpgid(getpid())){
-            //here means its the process leader
-            //Truncate and write
-            printf("Im the leader bros %d", getpid());
+        clock_t begin = clock();
+        FILE* log_file=NULL;
+        char* log_path=getenv("LOG_FILENAME");
+        if(log_path!=NULL){
+            if(getpid()==getpgid(getpid())){
+                log_file=fopen(log_path,"w");
+            }
+            else{
+                log_file=fopen(log_path,"a");
+            }
+            /* Create a Process */
+            proc_creat(log_file, argv, argc, begin);
+            fclose(log_file);
         }
 
 
@@ -85,7 +91,9 @@ int main(int argc, char *argv[], char *envp[]) {
                         
                         old_mode = get_current_file_mode(temp_file_path);
                         if(S_ISDIR(stat_buf.st_mode)){
+
                             int pid=fork();
+
                             switch (pid)
                             {
                                 case 0:{
@@ -120,9 +128,7 @@ int main(int argc, char *argv[], char *envp[]) {
         }
 
         free(file_path);
-
     }
-
     return 0;
     
 }

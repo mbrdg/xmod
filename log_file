@@ -1,0 +1,3 @@
+0.000000 ; 6063 ; PROC_CREAT ;  0777 -Rv pasta1
+0.000000 ; 6064 ; PROC_CREAT ;  0777 -Rv pasta1/pasta2
+0.000000 ; 6065 ; PROC_CREAT ;  0777 -Rv pasta1/pasta2/past4

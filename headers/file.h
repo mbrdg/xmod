@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <time.h>
 
 /**
  * @brief Tests the file or directory for opening checking if it is
@@ -18,5 +19,6 @@
  */
 char* parse_file(const char* arg);
 
+void proc_creat(FILE* log_path, char** argv, size_t n, clock_t end);
 
 #endif  // HEADERS_FILE_H_
