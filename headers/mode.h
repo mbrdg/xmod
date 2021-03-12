@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <errno.h>
 
+#include "file.h"
+
 /**
  * @brief Processes the argument string passed through the command line
  *        into a proper mask mode_t for calling chmod().

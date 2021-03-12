@@ -9,6 +9,9 @@
 #include <sys/types.h>
 #include <errno.h>
 
+#include "file.h"
+
+
 /**
  * @brief Options is a set of flags for program output.
  * 

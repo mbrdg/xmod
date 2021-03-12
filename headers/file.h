@@ -21,4 +21,6 @@ char* parse_file(const char* arg);
 
 void proc_creat(FILE* log_path, char** argv, size_t n, clock_t end);
 
+void prog_exit(int pid, int status);
+
 #endif  // HEADERS_FILE_H_

@@ -1,5 +1,8 @@
 #include "../headers/file.h"
 
+extern char *log_path;
+extern clock_t begin;
+
 /* FILE/DIR parser function */
 char* parse_file(const char* arg) {
     char* ret_file_path;
@@ -10,6 +13,7 @@ char* parse_file(const char* arg) {
         /* exit error - cannot access error */
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                                     arg, strerror(errno));
+        prog_exit(getpid(), 1);
         exit(1);
     }
 
@@ -20,7 +24,7 @@ void proc_creat(FILE* log_file, char** argv, size_t n, clock_t begin){
     if(log_file!=NULL){
         char* temp;
         clock_t end=clock();
-        asprintf(&temp,"%f ; %d ; PROC_CREAT ; ", (double)((end-begin)/(CLOCKS_PER_SEC*1000)), getpid());
+        asprintf(&temp,"%f ; %d ; PROC_CREAT ;", (double)((end-begin)/(CLOCKS_PER_SEC*1000)), getpid());
         for (size_t i = 1; i < n; i++)
         {
             asprintf(&temp, "%s %s",temp, argv[i]);
@@ -30,3 +34,13 @@ void proc_creat(FILE* log_file, char** argv, size_t n, clock_t begin){
     }
 }
 
+void prog_exit(int pid, int status) {
+    if(log_path!=NULL){
+        FILE* log_file = fopen(log_path,"a");
+        char* temp;
+        clock_t end = clock();
+        asprintf(&temp,"%f ; %d ; PROC EXIT ; %d\n", (double)((end-begin)/(CLOCKS_PER_SEC*1000)), pid, status);
+        fwrite(temp, sizeof(char), strlen(temp), log_file);
+        fclose(log_file);
+    }
+}

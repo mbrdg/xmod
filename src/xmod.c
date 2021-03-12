@@ -7,31 +7,33 @@
 #include "../headers/mode.h"
 #include "../headers/file.h"
 
+clock_t begin;
+char * log_path;
 
 int main(int argc, char *argv[], char *envp[]) {
-    
+    begin = clock();
+    FILE* log_file=NULL;
+    log_path=getenv("LOG_FILENAME");
+    if(log_path!=NULL){
+        if(getpid()==getpgid(getpid())){
+            log_file=fopen(log_path,"w");
+        }
+        else{
+            log_file=fopen(log_path,"a");
+        }
+        /* Create a Process */
+        proc_creat(log_file, argv, argc, begin);
+        fclose(log_file);
+    }
+
     if (argc < 3) {
         /* exit error - invalid number of arguments */
         fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
         fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
+        prog_exit(getpid(), 1);
         exit(1);
 
     } else {
-        clock_t begin = clock();
-        FILE* log_file=NULL;
-        char* log_path=getenv("LOG_FILENAME");
-        if(log_path!=NULL){
-            if(getpid()==getpgid(getpid())){
-                log_file=fopen(log_path,"w");
-            }
-            else{
-                log_file=fopen(log_path,"a");
-            }
-            /* Create a Process */
-            proc_creat(log_file, argv, argc, begin);
-            fclose(log_file);
-        }
-
 
         struct options opt = { .changes = false, 
                                .recursive = false, 
@@ -66,6 +68,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 fprintf(stderr, "xmod: invalid argument\n");
                 fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
                 fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
+                prog_exit(getpid(), 1);
                 exit(1);
             }
         }
@@ -103,6 +106,7 @@ int main(int argc, char *argv[], char *envp[]) {
                                 }
                                 case -1:
                                     perror("Fork()");
+                                    prog_exit(getpid(), 1);
                                     exit(1);
                                 
                                 default:{
@@ -128,7 +132,11 @@ int main(int argc, char *argv[], char *envp[]) {
         }
 
         free(file_path);
+    
+        prog_exit(getpid(), 0);
+
     }
+    
     return 0;
     
 }
