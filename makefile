@@ -13,7 +13,7 @@ OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 all: xmod
 
 xmod: $(OBJS)
-	$(CC) $(CFLAGS) $^ -o xmod
+	$(CC) $(CFLAGS) $^ -lm -o xmod
 
 $(BUILD_DIR)/%.c.o: %.c
 	$(MKDIR_P) $(dir $@)

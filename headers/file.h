@@ -19,7 +19,7 @@
  */
 char* parse_file(const char* arg);
 
-void proc_creat(FILE* log_path, char** argv, size_t n, clock_t end);
+void proc_creat(FILE* log_path, char** argv, size_t n);
 
 void prog_exit(int pid, int status);
 

@@ -7,11 +7,9 @@
 #include "../headers/mode.h"
 #include "../headers/file.h"
 
-clock_t begin;
 char * log_path;
 
 int main(int argc, char *argv[], char *envp[]) {
-    begin = clock();
     FILE* log_file=NULL;
     log_path=getenv("LOG_FILENAME");
     if(log_path!=NULL){
@@ -22,7 +20,7 @@ int main(int argc, char *argv[], char *envp[]) {
             log_file=fopen(log_path,"a");
         }
         /* Create a Process */
-        proc_creat(log_file, argv, argc, begin);
+        proc_creat(log_file, argv, argc);
         fclose(log_file);
     }
 
