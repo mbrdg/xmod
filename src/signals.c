@@ -1,0 +1,91 @@
+#include "../headers/signals.h"
+
+char *sig_name[]={"INVALID", "SIGHUP", "SIGINT", "SIGQUIT", "SIGILL", "SIGTRAP", "SIGABRT", "SIGBUS", "SIGFPE", "SIGKILL", "SIGUSR1", "SIGSEGV", "SIGUSR2", "SIGPIPE", "SIGALRM", "SIGTERM", "SIGSTKFLT", "SIGCHLD", "SIGCONT", "SIGSTOP", "SIGTSTP", "SIGTTIN", "SIGTTOU", "SIGURG", "SIGXCPU", "SIGXFSZ", "SIGVTALRM", "SIGPROF", "SIGWINCH", "SIGPOLL", "SIGPWR", "SIGSYS", NULL};
+extern unsigned int nftot;
+extern unsigned int nfmod;
+extern char* file_path;
+
+static void proc_info(){
+    char * info;
+    asprintf(&info, "\n%d ; %s ; %d ; %d", getpid(), file_path, nftot, nfmod);
+    write(STDOUT_FILENO, info, strlen(info));
+}
+
+static void sig_general_handler(int signal){
+    signal_recv(sig_name[signal]);
+    return;
+}
+
+static void sig_int_handler(int signal) {
+    char temp[1024];
+    signal_recv(sig_name[signal]);
+    proc_info();
+    if(getpgid(getpid()) == getpid()){
+        wait(NULL);
+        while(1){
+            write(STDOUT_FILENO, "\n\nDo you want to keep running the program [y/n] ", 49);
+            scanf("%s", temp);
+            if(strcmp(temp, "n") == 0){
+                signal_sent(sig_name[SIGKILL],0);
+                kill(0, SIGTERM);
+            }
+            else if(strcmp(temp, "y") == 0) {
+                signal_sent("SIGCONT",0);
+                kill(0, SIGCONT);
+                return;
+            }
+        }
+    } else {
+        pause();
+    }
+}
+
+static void sig_term_handler(int signal) {
+    if(getpid()==getpgid(getpid())){
+        wait(NULL);
+    }
+    signal_recv(sig_name[signal]);
+    proc_exit(getpid(),0);
+    exit(0);
+}
+
+void setup_signals(){
+    struct sigaction new, old;
+	sigset_t smask;	// defines signals to block while func() is running
+
+    // prepare struct sigaction
+    if (sigemptyset(&smask)==-1)	// block no signal
+        perror ("sigsetfunctions");
+
+    new.sa_mask = smask;
+    new.sa_flags = SA_RESTART;	// usually works
+
+    //int handler
+    new.sa_handler = sig_int_handler;
+    if(sigaction(SIGINT, &new, &old) == -1)
+        perror ("sigaction");
+
+    //term handler
+    new.sa_handler = sig_term_handler;
+    if(sigaction(SIGTERM, &new, &old) == -1)
+        perror ("sigaction");
+
+    //general handler
+    new.sa_handler = sig_general_handler;
+    if(sigaction(SIGHUP, &new, &old) == -1)
+        perror ("sigaction");
+    if(sigaction(SIGCONT, &new, &old) == -1)
+        perror ("sigaction");
+    if(sigaction(SIGQUIT, &new, &old) == -1)
+        perror ("sigaction");
+    if(sigaction(SIGUSR2, &new, &old) == -1)
+        perror ("sigaction");
+    if(sigaction(SIGSEGV, &new, &old) == -1)
+        perror ("sigaction");
+    if(sigaction(SIGPIPE, &new, &old) == -1)
+        perror ("sigaction");
+    if(sigaction(SIGALRM, &new, &old) == -1)
+        perror ("sigaction");
+    if(sigaction(SIGCHLD, &new, &old) == -1)
+        perror ("sigaction");
+}

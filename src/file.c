@@ -50,7 +50,9 @@ char* parse_file(const char* arg) {
         /* exit error - cannot access error */
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                                     arg, strerror(errno));
-        prog_exit(getpid(), 1);
+        fprintf(stderr, "failed to change mode of '%s' from 0000 (---------) to 0000 (---------)\n",
+                                    arg);
+        proc_exit(getpid(), 1);
         exit(1);
     }
 
@@ -65,17 +67,21 @@ void proc_creat(FILE* log_file, char** argv, size_t n){
         {
             asprintf(&temp, "%s %s",temp, argv[i]);
         }
-        fwrite(temp, sizeof(char), strlen(temp), log_file);
+        fwrite(temp, sizeof (char), strlen(temp), log_file);
         fputc('\n', log_file);
     }
 }
 
-void prog_exit(int pid, int status) {
+void proc_exit(int pid, int status) {
+    //if(getpid()!=getpgid(getpid())){  //CASO O PAI NAO TENHA DE ENVIAR QUE MORREU
+    signal_sent("SIGCHLD", getppid());
+    //}
     if(log_path!=NULL){
         FILE* log_file = fopen(log_path,"a");
         char* temp;
         asprintf(&temp,"%f ; %d ; PROC EXIT ; %d\n", get_proc_time(), pid, status);
-        fwrite(temp, sizeof(char), strlen(temp), log_file);
+        /* Signal safe */
+        write(log_file->_fileno, temp, strlen(temp));
         fclose(log_file);
     }
 }
@@ -86,7 +92,29 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, int pid){
         char* temp;
         old_mode &= 0777;
         asprintf(&temp,"%f ; %d ; FILE_MODF ; %s : %04o : %04o\n", get_proc_time(), pid, file_path, old_mode, new_mode);
-        fwrite(temp, sizeof(char), strlen(temp), log_file);
+        fwrite(temp, sizeof (char), strlen(temp), log_file);
+        fclose(log_file);
+    }
+}
+
+void signal_sent(char * signal, int pid){
+    if(log_path!=NULL){
+        FILE* log_file = fopen(log_path,"a");
+        char* temp;
+        asprintf(&temp,"%f ; %d ; SIGNAL_SENT ; %s : %d\n", get_proc_time(), getpid(), signal, pid); //See pid received
+        /* Signal safe */
+        write(log_file->_fileno, temp, strlen(temp));
+        fclose(log_file);
+    }
+}
+
+void signal_recv(char* signal){
+    if(log_path!=NULL){
+        FILE* log_file = fopen(log_path,"a");
+        char* temp;
+        asprintf(&temp,"%f ; %d ; SIGNAL_RECV ; %s\n", get_proc_time(), getpid(), signal);
+        /* Signal safe */
+        write(log_file->_fileno, temp, strlen(temp));
         fclose(log_file);
     }
 }

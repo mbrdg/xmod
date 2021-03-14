@@ -25,7 +25,7 @@ static u_int8_t permissions_set(const char* mode) {
             default:
                 /* exit error - invalid premission */
                 fprintf(stderr, "xmod: invalid premission '%c'\n", mode[i]);
-                prog_exit(getpid(), 1);
+                proc_exit(getpid(), 1);
                 exit(1);
         }
     }
@@ -48,13 +48,13 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
     if (strlen(mode) > MAX_STR_LENGTH || strlen(mode) < MIN_STR_LENGTH) {
         /* exit error - invalid MODE string size */
         fprintf(stderr, "xmod: invalid MODE string size\n");
-        prog_exit(getpid(), 1);
+        proc_exit(getpid(), 1);
         exit(1);
     }
     if (mode[1] != '-' && mode[1] != '=' && mode[1] != '+') {
         /* exit error - invalid MODE operand */
         fprintf(stderr, "xmod: invalid MODE operand '%c'\n", mode[1]);
-        prog_exit(getpid(), 1);
+        proc_exit(getpid(), 1);
         exit(1);
     }
     
@@ -131,7 +131,7 @@ static mode_t parse_mode_octal(const char* mode) {
 invalid_octal_format:
     /* Invalid MODE-OCTAL string format */
     fprintf(stderr, "xmod: invalid MODE-OCTAL input format\n");
-    prog_exit(getpid(), 1);
+    proc_exit(getpid(), 1);
     exit(1);
 }
 
@@ -155,7 +155,7 @@ mode_t parse_mode(const char* mode, char* file_path) {
         default:
             /* Invalid MODE string format */
             fprintf(stderr, "xmod: invalid MODE input format\n");
-            prog_exit(getpid(), 1);
+            proc_exit(getpid(), 1);
             exit(1);
     }
 }
@@ -168,7 +168,7 @@ mode_t get_current_file_mode(const char* file_path) {
         /* exit error - cannot access FILE/DIR status error */
         fprintf(stderr, "xmod: cannot access '%s' status: %s\n",
                                     file_path, strerror(errno));
-        prog_exit(getpid(), errno);
+        proc_exit(getpid(), errno);
         exit(errno);
     }
 

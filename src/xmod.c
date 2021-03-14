@@ -1,3 +1,7 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -6,8 +10,12 @@
 #include "../headers/options.h"
 #include "../headers/mode.h"
 #include "../headers/file.h"
+#include "../headers/signals.h"
 
 char * log_path;
+char* file_path;
+unsigned int nftot=1;
+unsigned int nfmod=0;
 
 int main(int argc, char *argv[], char *envp[]) {
     FILE* log_file=NULL;
@@ -15,20 +23,18 @@ int main(int argc, char *argv[], char *envp[]) {
     if(log_path!=NULL){
         if(getpid()==getpgid(getpid())){
             log_file=fopen(log_path,"w");
+            proc_creat(log_file, argv, argc);
+            fclose(log_file);
         }
-        else{
-            log_file=fopen(log_path,"a");
-        }
-        /* Create a Process */
-        proc_creat(log_file, argv, argc);
-        fclose(log_file);
     }
+
+    setup_signals();
 
     if (argc < 3) {
         /* exit error - invalid number of arguments */
         fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
         fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
-        prog_exit(getpid(), 1);
+        proc_exit(getpid(), 1);
         exit(1);
 
     } else {
@@ -40,7 +46,6 @@ int main(int argc, char *argv[], char *envp[]) {
         mode_t new_mode = 00u;
         bool mode_parsed = false;
         bool file_found = false;
-        char* file_path;
         int file_index=-1;
         int mode_index=-1;
 
@@ -66,7 +71,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 fprintf(stderr, "xmod: invalid argument\n");
                 fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
                 fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
-                prog_exit(getpid(), 1);
+                proc_exit(getpid(), 1);
                 exit(1);
             }
         }
@@ -95,17 +100,23 @@ int main(int argc, char *argv[], char *envp[]) {
                         if(S_ISDIR(stat_buf.st_mode)){
 
                             int pid=fork();
-
+                            
                             switch (pid)
                             {
                                 case 0:{
                                     asprintf(&argv[file_index],"%s", temp_file_path);
+                                    if(log_path!=NULL){
+                                        log_file=fopen(log_path,"a");
+                                        proc_creat(log_file, argv, argc);
+                                        fclose(log_file);
+                                    }
+                                    sleep(2);
                                     execv("./xmod",argv);
                                     break;
                                 }
                                 case -1:
                                     perror("Fork()");
-                                    prog_exit(getpid(), 1);
+                                    proc_exit(getpid(), 1);
                                     exit(1);
                                 
                                 default:{
@@ -115,9 +126,11 @@ int main(int argc, char *argv[], char *envp[]) {
                             }
                         }
                         else {
+                            nftot++;
                             chmod(temp_file_path, new_mode);
                             file_modf(temp_file_path, old_mode, new_mode, getpid());
                             options_output(&opt, temp_file_path, &old_mode, &new_mode, false);
+                            if(new_mode==old_mode) nfmod++;
                         }
                         
                     }
@@ -133,7 +146,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
         free(file_path);
     
-        prog_exit(getpid(), 0);
+        proc_exit(getpid(), 0);
 
     }
     

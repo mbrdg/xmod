@@ -6,7 +6,7 @@ int parse_options(struct options* opt, char* arg) {
     if(strlen(arg) == 1) {
         /* exit error - invalid option */
         fprintf(stderr, "xmod: invalid option -- '%c'\n", arg[0]);
-        prog_exit(getpid(), 1);
+        proc_exit(getpid(), 1);
         exit(1);
     }
 
@@ -26,7 +26,7 @@ int parse_options(struct options* opt, char* arg) {
             default:
                 /* exit error - invalid option */
                 fprintf(stderr, "xmod: invalid option -- '%c'\n", arg[i]);
-                prog_exit(getpid(), 1);
+                proc_exit(getpid(), 1);
                 exit(1);
         }
     }

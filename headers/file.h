@@ -21,8 +21,12 @@ char* parse_file(const char* arg);
 
 void proc_creat(FILE* log_path, char** argv, size_t n);
 
-void prog_exit(int pid, int status);
+void proc_exit(int pid, int status);
 
 void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, int pid);
+
+void signal_sent(char * signal, int pid);
+
+void signal_recv(char* signal);
 
 #endif  // HEADERS_FILE_H_
