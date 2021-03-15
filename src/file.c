@@ -62,7 +62,7 @@ char* parse_file(const char* arg) {
 void proc_creat(FILE* log_file, char** argv, size_t n){
     if(log_file!=NULL){
         char* temp;
-        asprintf(&temp,"%f ; %d ; PROC_CREAT ;", get_proc_time(), getpid());
+        asprintf(&temp,"%f ; %d ; PROC_CREAT  ;", get_proc_time(), getpid());
         for (size_t i = 1; i < n; i++)
         {
             asprintf(&temp, "%s %s",temp, argv[i]);
@@ -79,7 +79,7 @@ void proc_exit(int pid, int status) {
     if(log_path!=NULL){
         FILE* log_file = fopen(log_path,"a");
         char* temp;
-        asprintf(&temp,"%f ; %d ; PROC EXIT ; %d\n", get_proc_time(), pid, status);
+        asprintf(&temp,"%f ; %d ; PROC EXIT   ; %d\n", get_proc_time(), pid, status);
         /* Signal safe */
         write(log_file->_fileno, temp, strlen(temp));
         fclose(log_file);
@@ -91,7 +91,7 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, int pid){
         FILE* log_file = fopen(log_path,"a");
         char* temp;
         old_mode &= 0777;
-        asprintf(&temp,"%f ; %d ; FILE_MODF ; %s : %04o : %04o\n", get_proc_time(), pid, file_path, old_mode, new_mode);
+        asprintf(&temp,"%f ; %d ; FILE_MODF   ; %s : %04o : %04o\n", get_proc_time(), pid, file_path, old_mode, new_mode);
         fwrite(temp, sizeof (char), strlen(temp), log_file);
         fclose(log_file);
     }

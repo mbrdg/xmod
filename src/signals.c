@@ -16,12 +16,24 @@ static void sig_general_handler(int signal){
     return;
 }
 
+static void sigusr1Handler(int signal) {
+    signal_recv(sig_name[signal]);
+    if(getpid() != getpgid(getpid())) {
+        proc_info();
+        signal_sent(sig_name[SIGCONT],getppid());
+        kill(getppid(), SIGCONT);
+        pause();
+    }
+}
+
 static void sig_int_handler(int signal) {
     char temp[1024];
     signal_recv(sig_name[signal]);
-    proc_info();
     if(getpgid(getpid()) == getpid()){
-        sleep(1);
+        signal_sent(sig_name[SIGUSR1],getgid());
+        proc_info();
+        kill(0, SIGUSR1);
+        pause();
         while(1){
             write(STDOUT_FILENO, "\n\nDo you want to keep running the program [y/n] ", 49);
             scanf("%s", temp);
@@ -70,6 +82,10 @@ void setup_signals(){
     if(sigaction(SIGTERM, &new, &old) == -1)
         perror ("sigaction");
 
+    new.sa_handler = sigusr1Handler;
+    if(sigaction(SIGUSR1, &new, &old) == -1)
+        perror ("sigaction");
+    
     //general handler
     new.sa_handler = sig_general_handler;
     if(sigaction(SIGHUP, &new, &old) == -1)
