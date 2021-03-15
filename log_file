@@ -1,15 +1,67 @@
-265.765667 ; 9507 ; PROC_CREAT ; -vR 0777 pasta1/
-266.142130 ; 9507 ; FILE_MODF ; pasta1/ : 0777 : 0777
-266.207218 ; 9507 ; FILE_MODF ; pasta1//file2 : 0777 : 0777
-268.306255 ; 9508 ; PROC_CREAT ; -vR 0777 pasta1//pasta2
-2269.711018 ; 9508 ; FILE_MODF ; pasta1//pasta2 : 0777 : 0777
-2269.788027 ; 9508 ; FILE_MODF ; pasta1//pasta2/file3 : 0777 : 0777
-2269.830704 ; 9508 ; FILE_MODF ; pasta1//pasta2/file4 : 0777 : 0777
-2269.978523 ; 9509 ; PROC_CREAT ; -vR 0777 pasta1//pasta2/past4
-2860.066652 ; 9507 ; SIGNAL_RECV ; SIGINT
-2860.149384 ; 9508 ; SIGNAL_RECV ; SIGINT
-2860.199213 ; 9509 ; SIGNAL_RECV ; SIGINT
-44619.292259 ; 9507 ; SIGNAL_RECV ; SIGHUP
-44619.356871 ; 9508 ; SIGNAL_RECV ; SIGHUP
-44621.468782 ; 9509 ; SIGNAL_RECV ; SIGHUP
-44621.510029 ; 9509 ; SIGNAL_RECV ; SIGINT
+759.982824 ; 4938 ; PROC_CREAT ; 0777 -vR pasta1/
+760.128260 ; 4938 ; FILE_MODF ; pasta1/ : 0777 : 0777
+762.585163 ; 4938 ; FILE_MODF ; pasta1/file2 : 0777 : 0777
+762.779474 ; 4939 ; PROC_CREAT ; 0777 -vR pasta1/pasta2
+764.806986 ; 4939 ; FILE_MODF ; pasta1/pasta2 : 0777 : 0777
+764.916658 ; 4939 ; FILE_MODF ; pasta1/pasta2/file3 : 0777 : 0777
+764.969826 ; 4939 ; FILE_MODF ; pasta1/pasta2/file4 : 0777 : 0777
+766.553402 ; 4940 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4
+767.063141 ; 4940 ; FILE_MODF ; pasta1/pasta2/pasta4 : 0777 : 0777
+771.193266 ; 4940 ; FILE_MODF ; pasta1/pasta2/pasta4/fil-6 : 0777 : 0777
+774.135113 ; 4941 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5
+774.658203 ; 4941 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5 : 0777 : 0777
+776.470661 ; 4941 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/file_file_file : 0777 : 0777
+776.665211 ; 4942 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5/pasta6
+777.385712 ; 4942 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6 : 0777 : 0777
+777.528048 ; 4942 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/+top+ : 0777 : 0777
+779.052496 ; 4943 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5/pasta6/pasta7
+779.565811 ; 4943 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7 : 0777 : 0777
+780.018568 ; 4943 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/file_hello : 0777 : 0777
+780.227900 ; 4944 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8
+780.660152 ; 4944 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8 : 0777 : 0777
+783.886671 ; 4944 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/file_file : 0777 : 0777
+784.093857 ; 4945 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta9
+784.587860 ; 4945 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta9 : 0777 : 0777
+787.771702 ; 4945 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta9/file9 : 0777 : 0777
+788.035393 ; 4945 ; SIGNAL_SENT ; SIGCHLD : 4944
+788.069487 ; 4945 ; PROC EXIT ; 0
+790.296793 ; 4944 ; SIGNAL_RECV ; SIGCHLD
+790.556192 ; 4946 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10
+795.382738 ; 4946 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10 : 0777 : 0777
+795.556307 ; 4946 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/file10 : 0777 : 0777
+795.777559 ; 4947 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11
+796.259165 ; 4947 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11 : 0777 : 0777
+797.679424 ; 4947 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/nomore_files : 0777 : 0777
+797.925234 ; 4948 ; PROC_CREAT ; 0777 -vR pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/pasta12
+798.608303 ; 4948 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/pasta12 : 0777 : 0777
+804.129601 ; 4948 ; FILE_MODF ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/pasta12/ja_ta_bom : 0777 : 0777
+804.281712 ; 4948 ; SIGNAL_SENT ; SIGCHLD : 4947
+804.351807 ; 4948 ; PROC EXIT ; 0
+804.508924 ; 4947 ; SIGNAL_RECV ; SIGCHLD
+804.558754 ; 4947 ; SIGNAL_SENT ; SIGCHLD : 4946
+804.588079 ; 4947 ; PROC EXIT ; 0
+804.709435 ; 4946 ; SIGNAL_RECV ; SIGCHLD
+804.808617 ; 4946 ; SIGNAL_SENT ; SIGCHLD : 4944
+804.838657 ; 4946 ; PROC EXIT ; 0
+805.028677 ; 4944 ; SIGNAL_RECV ; SIGCHLD
+805.109501 ; 4944 ; SIGNAL_SENT ; SIGCHLD : 4943
+805.138826 ; 4944 ; PROC EXIT ; 0
+807.042837 ; 4943 ; SIGNAL_RECV ; SIGCHLD
+807.097197 ; 4943 ; SIGNAL_SENT ; SIGCHLD : 4942
+807.126760 ; 4943 ; PROC EXIT ; 0
+812.901258 ; 4942 ; SIGNAL_RECV ; SIGCHLD
+812.971592 ; 4942 ; SIGNAL_SENT ; SIGCHLD : 4941
+813.004017 ; 4942 ; PROC EXIT ; 0
+813.184023 ; 4941 ; SIGNAL_RECV ; SIGCHLD
+813.235044 ; 4941 ; SIGNAL_SENT ; SIGCHLD : 4940
+813.265085 ; 4941 ; PROC EXIT ; 0
+813.396931 ; 4940 ; SIGNAL_RECV ; SIGCHLD
+813.443422 ; 4940 ; SIGNAL_SENT ; SIGCHLD : 4939
+813.473463 ; 4940 ; PROC EXIT ; 0
+813.598394 ; 4939 ; SIGNAL_RECV ; SIGCHLD
+813.654423 ; 4939 ; SIGNAL_SENT ; SIGCHLD : 4938
+813.684464 ; 4939 ; PROC EXIT ; 0
+815.008163 ; 4938 ; SIGNAL_RECV ; SIGCHLD
+815.067768 ; 4938 ; FILE_MODF ; pasta1/file1 : 0777 : 0777
+815.125465 ; 4938 ; SIGNAL_SENT ; SIGCHLD : 2959
+815.157652 ; 4938 ; PROC EXIT ; 0

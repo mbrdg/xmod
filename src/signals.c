@@ -21,16 +21,16 @@ static void sig_int_handler(int signal) {
     signal_recv(sig_name[signal]);
     proc_info();
     if(getpgid(getpid()) == getpid()){
-        wait(NULL);
+        sleep(1);
         while(1){
             write(STDOUT_FILENO, "\n\nDo you want to keep running the program [y/n] ", 49);
             scanf("%s", temp);
             if(strcmp(temp, "n") == 0){
-                signal_sent(sig_name[SIGKILL],0);
+                signal_sent(sig_name[SIGTERM],getgid());
                 kill(0, SIGTERM);
             }
             else if(strcmp(temp, "y") == 0) {
-                signal_sent("SIGCONT",0);
+                signal_sent(sig_name[SIGCONT],getgid());
                 kill(0, SIGCONT);
                 return;
             }

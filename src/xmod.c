@@ -81,6 +81,7 @@ int main(int argc, char *argv[], char *envp[]) {
         chmod(file_path, new_mode);
         file_modf(file_path, old_mode, new_mode, getpid());
         options_output(&opt, file_path, &old_mode, &new_mode, false);
+        if(new_mode!=old_mode) nfmod++;
 
         if(opt.recursive){
             DIR* directory;
@@ -90,7 +91,9 @@ int main(int argc, char *argv[], char *envp[]) {
                 while ((dir=readdir(directory))!=NULL)
                 {
                     char * temp_file_path=NULL;
-                    asprintf(&temp_file_path, "%s/%s", file_path, dir->d_name);
+                    if(file_path[strlen(file_path)-1]=='/'){
+                        asprintf(&temp_file_path, "%s%s", file_path, dir->d_name);
+                    } else asprintf(&temp_file_path, "%s/%s", file_path, dir->d_name);
                     stat(temp_file_path,&stat_buf);
 
                     if((strcmp(dir->d_name,"..")!=0) && (strcmp(dir->d_name,".")!=0)){
@@ -104,13 +107,15 @@ int main(int argc, char *argv[], char *envp[]) {
                             switch (pid)
                             {
                                 case 0:{
+                                    nftot=1;
+                                    nfmod=0;
                                     asprintf(&argv[file_index],"%s", temp_file_path);
+                                    file_path=temp_file_path;
                                     if(log_path!=NULL){
                                         log_file=fopen(log_path,"a");
                                         proc_creat(log_file, argv, argc);
                                         fclose(log_file);
                                     }
-                                    sleep(2);
                                     execv("./xmod",argv);
                                     break;
                                 }
@@ -130,7 +135,7 @@ int main(int argc, char *argv[], char *envp[]) {
                             chmod(temp_file_path, new_mode);
                             file_modf(temp_file_path, old_mode, new_mode, getpid());
                             options_output(&opt, temp_file_path, &old_mode, &new_mode, false);
-                            if(new_mode==old_mode) nfmod++;
+                            if(new_mode!=old_mode) nfmod++;
                         }
                         
                     }
