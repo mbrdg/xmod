@@ -169,7 +169,7 @@ mode_t get_current_file_mode(const char* file_path) {
         fprintf(stderr, "xmod: cannot access '%s' status: %s\n",
                                     file_path, strerror(errno));
         proc_exit(getpid(), errno);
-        exit(errno);
+        //exit(errno);
     }
 
     return file_mode.st_mode;

@@ -7,8 +7,14 @@ extern char* file_path;
 
 static void proc_info(){
     char * info;
-    asprintf(&info, "\n%d ; %s ; %d ; %d", getpid(), file_path, nftot, nfmod);
-    write(STDOUT_FILENO, info, strlen(info));
+    if(asprintf(&info, "\n%d ; %s ; %d ; %d", getpid(), file_path, nftot, nfmod) == -1){
+        proc_exit(getpid(), 1);
+        exit(1);
+    }
+    if(write(STDOUT_FILENO, info, strlen(info)) == -1) {
+        proc_exit(getpid(), 1);
+        exit(1);
+    }
 }
 
 static void sig_general_handler(int signal){
@@ -35,8 +41,14 @@ static void sig_int_handler(int signal) {
         kill(0, SIGUSR1);
         pause();
         while(1){
-            write(STDOUT_FILENO, "\n\nDo you want to keep running the program [y/n] ", 49);
-            scanf("%s", temp);
+            if(write(STDOUT_FILENO, "\n\nDo you want to keep running the program [y/n] ", 49) == -1){
+                proc_exit(getpid(), 1);
+                exit(1);
+            }
+            if(scanf("%s", temp) == EOF) {
+                proc_exit(getpid(), 1);
+                exit(1);
+            }
             if(strcmp(temp, "n") == 0){
                 signal_sent(sig_name[SIGTERM],getgid());
                 kill(0, SIGTERM);

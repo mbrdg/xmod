@@ -1,67 +1,16 @@
-1019.886732 ; 8366 ; PROC_CREAT  ; -vR 0777 pasta1
-1020.206690 ; 8366 ; FILE_MODF   ; pasta1 : 0777 : 0777
-1020.453930 ; 8366 ; FILE_MODF   ; pasta1/file1 : 0777 : 0777
-1020.617962 ; 8366 ; FILE_MODF   ; pasta1/file2 : 0777 : 0777
-1021.186829 ; 8367 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2
-1022.506237 ; 8367 ; FILE_MODF   ; pasta1/pasta2 : 0777 : 0777
-1022.760153 ; 8367 ; FILE_MODF   ; pasta1/pasta2/file4 : 0777 : 0777
-1022.941113 ; 8367 ; FILE_MODF   ; pasta1/pasta2/file3 : 0777 : 0777
-1023.473740 ; 8368 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4
-1024.780512 ; 8368 ; FILE_MODF   ; pasta1/pasta2/pasta4 : 0777 : 0777
-1025.352478 ; 8369 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5
-1027.136087 ; 8369 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5 : 0777 : 0777
-1027.771711 ; 8370 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5/pasta6
-1029.296160 ; 8370 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6 : 0777 : 0777
-1029.980659 ; 8371 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5/pasta6/pasta7
-1031.266212 ; 8371 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7 : 0777 : 0777
-1031.509161 ; 8371 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/file_hello : 0777 : 0777
-1032.130003 ; 8372 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8
-1033.417702 ; 8372 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8 : 0777 : 0777
-1033.664227 ; 8372 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/file_file : 0777 : 0777
-1033.955097 ; 8373 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10
-1034.433365 ; 8373 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10 : 0777 : 0777
-1034.670591 ; 8374 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11
-1035.133600 ; 8374 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11 : 0777 : 0777
-1035.222530 ; 8374 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/nomore_files : 0777 : 0777
-1035.444021 ; 8375 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/pasta12
-1035.962343 ; 8375 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/pasta12 : 0777 : 0777
-1036.081553 ; 8375 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/pasta11/pasta12/ja_ta_bom : 0777 : 0777
-1036.176205 ; 8375 ; SIGNAL_SENT ; SIGCHLD : 8374
-1036.216259 ; 8375 ; PROC EXIT   ; 0
-1036.372900 ; 8374 ; SIGNAL_RECV ; SIGCHLD
-1036.458492 ; 8374 ; SIGNAL_SENT ; SIGCHLD : 8373
-1036.505699 ; 8374 ; PROC EXIT   ; 0
-1036.683321 ; 8373 ; SIGNAL_RECV ; SIGCHLD
-1036.741257 ; 8373 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta10/file10 : 0777 : 0777
-1036.848545 ; 8373 ; SIGNAL_SENT ; SIGCHLD : 8372
-1036.889791 ; 8373 ; PROC EXIT   ; 0
-1037.067890 ; 8372 ; SIGNAL_RECV ; SIGCHLD
-1037.277460 ; 8376 ; PROC_CREAT  ; -vR 0777 pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta9
-1037.749529 ; 8376 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta9 : 0777 : 0777
-1037.838459 ; 8376 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/pasta7/pasta8/pasta9/file9 : 0777 : 0777
-1037.899494 ; 8376 ; SIGNAL_SENT ; SIGCHLD : 8372
-1037.939310 ; 8376 ; PROC EXIT   ; 0
-1038.059711 ; 8372 ; SIGNAL_RECV ; SIGCHLD
-1038.116932 ; 8372 ; SIGNAL_SENT ; SIGCHLD : 8371
-1038.154364 ; 8372 ; PROC EXIT   ; 0
-1038.321972 ; 8371 ; SIGNAL_RECV ; SIGCHLD
-1038.376331 ; 8371 ; SIGNAL_SENT ; SIGCHLD : 8370
-1038.429260 ; 8371 ; PROC EXIT   ; 0
-1038.583279 ; 8370 ; SIGNAL_RECV ; SIGCHLD
-1038.642645 ; 8370 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/pasta6/+top+ : 0777 : 0777
-1038.707972 ; 8370 ; SIGNAL_SENT ; SIGCHLD : 8369
-1038.759947 ; 8370 ; PROC EXIT   ; 0
-1038.960218 ; 8369 ; SIGNAL_RECV ; SIGCHLD
-1039.022207 ; 8369 ; FILE_MODF   ; pasta1/pasta2/pasta4/pasta5/file_file_file : 0777 : 0777
-1039.084196 ; 8369 ; SIGNAL_SENT ; SIGCHLD : 8368
-1039.122105 ; 8369 ; PROC EXIT   ; 0
-1039.276361 ; 8368 ; SIGNAL_RECV ; SIGCHLD
-1039.347649 ; 8368 ; FILE_MODF   ; pasta1/pasta2/pasta4/fil-6 : 0777 : 0777
-1039.429426 ; 8368 ; SIGNAL_SENT ; SIGCHLD : 8367
-1039.479971 ; 8368 ; PROC EXIT   ; 0
-1039.654255 ; 8367 ; SIGNAL_RECV ; SIGCHLD
-1039.719105 ; 8367 ; SIGNAL_SENT ; SIGCHLD : 8366
-1039.763689 ; 8367 ; PROC EXIT   ; 0
-1039.904118 ; 8366 ; SIGNAL_RECV ; SIGCHLD
-1039.961576 ; 8366 ; SIGNAL_SENT ; SIGCHLD : 4429
-1040.001869 ; 8366 ; PROC EXIT   ; 0
+941.568613 ; 10398 ; PROC_CREAT  ; -vR 0666 teste
+941.913843 ; 10398 ; FILE_MODF   ; teste : 0777 : 0666
+942.152977 ; 10398 ; SIGNAL_SENT ; SIGCHLD : 4429
+942.279577 ; 10398 ; PROC EXIT   ; 13
+942.402363 ; 10398 ; FILE_MODF   ; teste/teste_sigaction.c : 0620 : 0666
+942.561626 ; 10398 ; SIGNAL_SENT ; SIGCHLD : 4429
+942.679405 ; 10398 ; PROC EXIT   ; 13
+942.790270 ; 10398 ; FILE_MODF   ; teste/teste.c : 0620 : 0666
+942.935228 ; 10398 ; SIGNAL_SENT ; SIGCHLD : 4429
+943.052769 ; 10398 ; PROC EXIT   ; 13
+943.170309 ; 10398 ; FILE_MODF   ; teste/Makefile : 0620 : 0666
+943.314552 ; 10398 ; SIGNAL_SENT ; SIGCHLD : 4429
+943.439484 ; 10398 ; PROC EXIT   ; 13
+943.556309 ; 10398 ; FILE_MODF   ; teste/teste : 0620 : 0666
+943.735361 ; 10398 ; SIGNAL_SENT ; SIGCHLD : 4429
+943.859816 ; 10398 ; PROC EXIT   ; 0

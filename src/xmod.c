@@ -1,7 +1,3 @@
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE 1
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -17,7 +13,7 @@ char* file_path;
 unsigned int nftot=1;
 unsigned int nfmod=0;
 
-int main(int argc, char *argv[], char *envp[]) {
+int main(int argc, char *argv[]) {
     FILE* log_file=NULL;
     log_path=getenv("LOG_FILENAME");
     if(log_path!=NULL){
@@ -92,8 +88,16 @@ int main(int argc, char *argv[], char *envp[]) {
                 {
                     char * temp_file_path=NULL;
                     if(file_path[strlen(file_path)-1]=='/'){
-                        asprintf(&temp_file_path, "%s%s", file_path, dir->d_name);
-                    } else asprintf(&temp_file_path, "%s/%s", file_path, dir->d_name);
+                        if(asprintf(&temp_file_path, "%s%s", file_path, dir->d_name) == -1){
+                            fprintf(stderr, "Temos de colocar as mensagens de erro direitas\n");
+                            proc_exit(getpid(), 1);
+                            exit(1);
+                        }
+                    } else if(asprintf(&temp_file_path, "%s/%s", file_path, dir->d_name) == -1) {
+                        fprintf(stderr, "Temos de colocar as mensagens de erro direitas\n");
+                        proc_exit(getpid(), 1);
+                        exit(1);
+                    }
                     stat(temp_file_path,&stat_buf);
 
                     if((strcmp(dir->d_name,"..")!=0) && (strcmp(dir->d_name,".")!=0)){
@@ -109,7 +113,11 @@ int main(int argc, char *argv[], char *envp[]) {
                                 case 0:{
                                     nftot=1;
                                     nfmod=0;
-                                    asprintf(&argv[file_index],"%s", temp_file_path);
+                                    if(asprintf(&argv[file_index],"%s", temp_file_path) == -1) {
+                                        fprintf(stderr, "Temos de colocar as mensagens de erro direitas\n");
+                                        proc_exit(getpid(), 1);
+                                        exit(1);
+                                    }
                                     file_path=temp_file_path;
                                     if(log_path!=NULL){
                                         log_file=fopen(log_path,"a");
