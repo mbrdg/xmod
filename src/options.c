@@ -4,13 +4,12 @@ extern struct logs log_info;
 
 /* [Options] parser function */
 int parse_options(struct options* opt, char* arg) {
-
     if (strlen(arg) == 1) {
         /* exit error - invalid option */
         fprintf(stderr, "xmod: invalid option -- '%c'\n", arg[0]);
 
         if (log_info.available)
-            proc_exit(&log_info, getpid(), 1);
+            proc_exit(getpid(), 1);
         exit(1);
     }
 
@@ -32,7 +31,7 @@ int parse_options(struct options* opt, char* arg) {
                 fprintf(stderr, "xmod: invalid option -- '%c'\n", arg[i]);
 
                 if (log_info.available)
-                    proc_exit(&log_info, getpid(), 1);
+                    proc_exit(getpid(), 1);
                 exit(1);
         }
     }
@@ -91,6 +90,8 @@ void options_output(const struct options* opt, const char* file_path,
         }
 
     } else {
+        fprintf(stderr, "xmod: cannot read directory '%s': %s\n",
+                file_path, strerror(errno));
         if (opt->verbose) {
                 fprintf(stderr, "failed to change mode of '%s' from %04o (%s) to %04o (%s)\n",
                         file_path, (*old_mode), curr_mode, (*new_mode), pret_mode);

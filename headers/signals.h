@@ -11,6 +11,10 @@
 
 #include "../headers/logs.h"
 
+/**
+ * @brief Sets all the handlers required for signals
+ * 
+ */
 void setup_signals();
 
 #endif  // HEADERS_SIGNALS_H_

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <dirent.h>
 #include <wait.h>
 
@@ -10,13 +12,12 @@
 #include "../headers/signals.h"
 #include "../headers/logs.h"
 
-char* file_path; //Review
-
 /* 
  * File struct that will containg LOG_FILENAME information if
  * the environment variable with the same name is set to a valid path.
  */
 struct logs log_info;
+char* file_path;  // Path to the current processed file
 
 /* Found Files and Modified Files counters */
 uint32_t nftot = 1u;
@@ -24,7 +25,7 @@ uint32_t nfmod = 0u;
 
 int main(int argc, char *argv[]) {
     /* LOGS Setup */
-    logs_setup(&log_info, argc, argv);
+    logs_setup(argc, argv);
     setup_signals();
 
     if (argc < 3) {
@@ -33,12 +34,11 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
 
         if (log_info.available)
-            proc_exit(&log_info, getpid(), 1);
+            proc_exit(getpid(), 1);
 
         exit(1);
 
     } else {
-
         struct options opt = { .changes = false, 
                                .recursive = false, 
                                .verbose = false 
@@ -47,8 +47,7 @@ int main(int argc, char *argv[]) {
         bool mode_parsed = false;
         bool file_found = false;
 
-        // int8_t file_index = -1;
-        int8_t mode_index = -1;
+        int8_t md_ind = -1;
 
         for (size_t i = argc - 1; i >= 1; --i) {
             if (argv[i][0] == '-' && argv[i][1] != 'r' && 
@@ -60,13 +59,12 @@ int main(int argc, char *argv[]) {
                 /* FILE/DIR input parsing */
                 file_path = parse_file(argv[i]);
                 file_found = true;
-                // file_index = i;
 
             } else if (!mode_parsed) {
                 /* MODE input parsing */
                 new_mode = parse_mode(argv[i], file_path);
                 mode_parsed = true;
-                mode_index = i;
+                md_ind = i;
 
             } else {
                 /* exit error - invalid number of arguments */
@@ -75,98 +73,108 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Usage: xmod [OPTIONS] OCTAL-MODE FILE/DIR\n");
 
                 if (log_info.available)
-                    proc_exit(&log_info, getpid(), 1);
+                    proc_exit(getpid(), 1);
 
                 exit(1);
             }
         }
 
-        /* output stuff */
+        /* 
+         * Whenever a FILE/DIR is found, we assume - by looking at chmod's
+         * output - that chmod changes the FILE/DIR before calling fork()
+         * to handle sub-folders within the recursive approach.
+        */
         mode_t old_mode = get_current_file_mode(file_path);
-
         chmod(file_path, new_mode);
 
         if (log_info.available)
-            file_modf(&log_info, file_path, old_mode, new_mode, getpid());
-
+            file_modf(file_path, old_mode, new_mode, getpid());
         options_output(&opt, file_path, &old_mode, &new_mode, false);
 
         nfmod = (new_mode == old_mode) ? nfmod : nfmod + 1;
 
         if (opt.recursive) {
             DIR* directory;
-            struct stat stat_buf;
             struct dirent* dir;
+            struct stat stat_buf;
 
             if ((directory = opendir(file_path)) != NULL) {
                 while ((dir = readdir(directory)) != NULL) {
-                    char* temp_file_path = process_node(file_path, dir->d_name);
-                    stat(temp_file_path, &stat_buf);
+
+                    char* tmp_fl_path = process_node(file_path, dir->d_name);
+                    stat(tmp_fl_path, &stat_buf);
 
                     if ((strcmp(dir->d_name, "..") != 0) &&
                         (strcmp(dir->d_name, ".") != 0)) {
-                        new_mode = parse_mode(argv[mode_index], temp_file_path);
-                        old_mode = get_current_file_mode(temp_file_path);
+                        new_mode = parse_mode(argv[md_ind], tmp_fl_path);
+                        old_mode = get_current_file_mode(tmp_fl_path);
 
                         if (S_ISDIR(stat_buf.st_mode)) {
                             pid_t pid = fork();
-                            
+
                             switch (pid) {
+                                case -1:
+                                    if (log_info.available)
+                                        proc_exit(getpid(), 1);
+                                    exit(1);
+
                                 case 0:
-                                    
-                                    /* Child must not count parent's files */
+
+                                /*
+                                 * Perhaps not the best practice but the new
+                                 * process must have its own directory so we
+                                 * assign file_path to point to the same string
+                                 * built by the parent and that is a sub-folder
+                                 */  
+                                    file_path = tmp_fl_path;
+
+                                /* Child must not count parent's files */
                                     nftot = 1u;
                                     nfmod = 0u;
 
-                                    /* 5 is the max allowed for OPTION args */
+                                /* 5 is the max allowed for OPTION args */
                                     char opt_str[5];
                                     get_options_str(&opt, opt_str);
-                                    
-                                    /* Program image Replacing */
-                                    execl("./xmod", opt_str, argv[mode_index], 
-                                         temp_file_path, NULL);
-                                    break;
 
-                                case -1:
-                                    perror("Fork()");
-                                    if (log_info.available)
-                                        proc_exit(&log_info, getpid(), 1);
-                                    exit(1);
+                                /* Program image Replacing */
+                                    execl(argv[0], argv[0], opt_str, argv[md_ind],
+                                          tmp_fl_path, NULL);
                                 
-                                default: 
+                                /* Only if something goes wrong with exec */
+                                    if (log_info.available)
+                                        proc_exit(getpid(), 127);
+                                    exit(127);
+
+                                default:
                                     wait(&pid);
                                     break;
                             }
-
+                            
                         } else {
                             nftot++;
-                            chmod(temp_file_path, new_mode);
+                            chmod(tmp_fl_path, new_mode);
 
                             if (log_info.available)
-                                file_modf(&log_info, temp_file_path, old_mode, new_mode, getpid());
-                            options_output(&opt, temp_file_path, &old_mode, &new_mode, false);
+                                file_modf(tmp_fl_path, old_mode, new_mode, getpid());
+                            options_output(&opt, tmp_fl_path, 
+                                           &old_mode, &new_mode, false);
 
                             nfmod = (new_mode == old_mode) ? nfmod : nfmod + 1;
-                        }
-                        
+                        } 
                     }
-    
-                    free(temp_file_path);
+                    free(tmp_fl_path);
                 }
-
                 closedir(directory);
 
             } else {
-                fprintf(stderr, "xmod: cannot read directory '%s': %s\n",
-                        file_path, strerror(errno));
+                /* something failed in this point */
                 options_output(&opt, file_path, &old_mode, &new_mode, true);
             }
         }
-
         free(file_path);
     }
 
     if (log_info.available)
-        proc_exit(&log_info, getpid(), 0);
+        proc_exit(getpid(), 0);
     return 0;
 }

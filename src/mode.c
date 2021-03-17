@@ -28,7 +28,7 @@ static uint8_t permissions_set(const char* mode) {
                 /* exit error - invalid premission */
                 fprintf(stderr, "xmod: invalid premission '%c'\n", mode[i]);
                 if (log_info.available)
-                    proc_exit(&log_info, getpid(), 1);
+                    proc_exit(getpid(), 1);
                 exit(1);
         }
     }
@@ -53,7 +53,7 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
         fprintf(stderr, "xmod: invalid MODE string size\n");
 
         if (log_info.available)
-            proc_exit(&log_info, getpid(), 1);
+            proc_exit(getpid(), 1);
         exit(1);
     }
     if (mode[1] != '-' && mode[1] != '=' && mode[1] != '+') {
@@ -61,7 +61,7 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
         fprintf(stderr, "xmod: invalid MODE operand '%c'\n", mode[1]);
 
         if (log_info.available)
-            proc_exit(&log_info, getpid(), 1);
+            proc_exit(getpid(), 1);
         exit(1);
     }
     
@@ -140,7 +140,7 @@ invalid_octal_format:
     fprintf(stderr, "xmod: invalid MODE-OCTAL input format\n");
 
     if (log_info.available)
-        proc_exit(&log_info, getpid(), 1);
+        proc_exit(getpid(), 1);
     exit(1);
 }
 
@@ -166,7 +166,7 @@ mode_t parse_mode(const char* mode, char* file_path) {
             fprintf(stderr, "xmod: invalid MODE input format\n");
             
             if (log_info.available)
-                proc_exit(&log_info, getpid(), 1);
+                proc_exit(getpid(), 1);
             exit(1);
     }
 }

@@ -28,7 +28,7 @@ static double get_proc_time() {
         char* token_2;
 
         token_2 = strtok(temp, " ");
-        for(int i = 0; i < TIME_INDEX; ++i)
+        for (int i = 0; i < TIME_INDEX; ++i)
             token_2 = strtok(NULL, " ");
 
         proc_time = atoll(token_2);
@@ -37,7 +37,7 @@ static double get_proc_time() {
     struct timespec time;
     clock_gettime(CLOCK_REALTIME, &time);
     /*
-     * time.tvsec + time.tvnsec * 10^-9 = tempo desde 1 de Janeiro de 1970 até agora 
+     * time.tvsec + time.tvnsec * 10^-9 = tempo desde a Epoch (1970-1-1)
      * all_time = tempo desde a época até ao momento em que ligamos a máquina
      * time.tvsec - all_time = tempo desde que ligamos a máquina
      * proc_time = tempo desde que a máquina ligou até o processo inicial
@@ -48,32 +48,32 @@ static double get_proc_time() {
 }
 
 
+extern struct logs log_info;
+
 /* LOGS Setup */
-void logs_setup(struct logs* log_file, int argc, char *argv[]) {
-    char log_path[MAX_STR_LEN];
-    strncpy(log_path, getenv("LOG_FILENAME"), MAX_STR_LEN - 1);
+void logs_setup(int argc, char *argv[]) {
+    log_info.available = (getenv("LOG_FILENAME") != NULL);
 
-    log_file->available = log_path != NULL;
-    strncpy(log_file->file_path, log_path, MAX_STR_LEN);
+    if (log_info.available) {
+        strncpy(log_info.file_path, getenv("LOG_FILENAME"), MAX_STR_LEN);
 
-    if (log_file->available) {
         if (GROUP_LEADER) {
+            char log_header[30] = " instant ; pid ; event ; info";
+
             /* LOG_FILENAME Truncation */
-            log_file->fp = fopen(log_file->file_path, "r+");
-            fclose(log_file->fp);
-
-            proc_creat(log_file, argc, argv);
+            log_info.fp = fopen(log_info.file_path, "w");
+            fwrite(log_header, sizeof(char), strlen(log_header), log_info.fp);
+            fclose(log_info.fp);
         }
-    }
 
+        proc_creat(argc, argv);
+    }
 }
 
 /* PROCESS CREATED */
-void proc_creat(struct logs* log_file, int argc, char* argv[]) {
-    log_file->fp = fopen(log_file->file_path, "a");
-    
+void proc_creat(int argc, char* argv[]) {    
     char temp[MAX_STR_LEN];
-    snprintf(temp, MAX_STR_LEN, "%f ; %d ; PROC_CREAT  ;\n",
+    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; PROC_CREAT ;",
              get_proc_time(), getpid());
 
     for (int i = 1; i < argc; ++i) {
@@ -81,86 +81,96 @@ void proc_creat(struct logs* log_file, int argc, char* argv[]) {
         strncat(temp, argv[i], MAX_STR_LEN - strlen(temp));
     }
 
+    log_info.fp = fopen(log_info.file_path, "a");
+
     /* To avoid compilation warnings, it's useless calling proc_exit() */
-    if (fwrite(temp, sizeof(char), strlen(temp) + 1, log_file->fp) !=
+    if (fwrite(temp, sizeof(char), strlen(temp), log_info.fp) <
         strlen(temp))
         exit(1);
 
-    fclose(log_file->fp);
+    fclose(log_info.fp);
 }
 
 /* PROCESS TERMINATED */
-void proc_exit(struct logs* log_file, pid_t pid, int status) {
-    signal_sent(log_file, "SIGCHLD", getppid());        
+void proc_exit(pid_t pid, int status) {
+    signal_sent("SIGCHLD", getppid());        
 
-    int fl = open(log_file->file_path, O_APPEND);
     char temp[MAX_STR_LEN];
-    snprintf(temp, MAX_STR_LEN, "%f ; %d ; PROC EXIT   ; %d\n",
+    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; PROC_EXIT ; %d",
              get_proc_time(), pid, status);
 
-    /* 
-     * Signal safe!
-     * Function might be called from a signal handler,
-     * however fwrite isn't listed in signal-safety(7)
-     */
-    if (write(fl, temp, strlen(temp) + 1) == -1)
-        exit(1);
+    if (log_info.available) {
+        int fl = open(log_info.file_path, O_WRONLY | O_APPEND);
 
-    close(fl);
+        /* 
+        * Signal safe!
+        * Function might be called from a signal handler,
+        * however fwrite isn't listed in signal-safety(7)
+        */
+        if (write(fl, temp, strlen(temp)) == -1)
+            exit(1);
+
+        close(fl);
+    }
 }
 
 /* Modified FILE/DIR */
-void file_modf(struct logs* log_file, char* file_path, 
-               mode_t old_mode, mode_t new_mode, pid_t pid) {
-    log_file->fp = fopen(log_file->file_path, "a");
+void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
+    log_info.fp = fopen(log_info.file_path, "a");
     char temp[MAX_STR_LEN];
 
     old_mode &= 0777;
 
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; FILE_MODF   ; %s : %04o : %04o\n",
+    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; FILE_MODF ; %s : %04o : %04o",
              get_proc_time(), pid, file_path, old_mode, new_mode);
 
     /* To avoid compilation warnings, it's useless calling proc_exit() */
-    if (fwrite(temp, sizeof(char), strlen(temp) + 1, log_file->fp) !=
+    if (fwrite(temp, sizeof(char), strlen(temp), log_info.fp) <
         strlen(temp))
         exit(1);
 
-    fclose(log_file->fp);
+    fclose(log_info.fp);
 }
 
 
 /* Signal Sent */
-void signal_sent(struct logs* log_file, char* signal, pid_t pid) {
+void signal_sent(char* signal, pid_t pid) {
     char temp[MAX_STR_LEN];
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; SIGNAL_SENT ; %s : %d\n",
+    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; SIGNAL_SENT ; %s : %d",
              get_proc_time(), getpid(), signal, pid);
-    int fl = open(log_file->file_path, O_APPEND);
     
-    /* 
-     * Signal safe!
-     * Function might be called from a signal handler,
-     * however fwrite isn't listed in signal-safety(7)
-     */
-    if (write(fl, temp, strlen(temp) + 1) == -1)
-        exit(1);
+    if (log_info.available) {
+        int fl = open(log_info.file_path, O_WRONLY | O_APPEND);
 
-    close(fl);
+        /* 
+        * Signal safe!
+        * Function might be called from a signal handler,
+        * however fwrite isn't listed in signal-safety(7)
+        */
+        if (write(fl, temp, strlen(temp)) == -1)
+            exit(1);
+
+        close(fl);
+    }
 }
 
 /* Signal Received */
-void signal_recv(struct logs* log_file, char* signal){
+void signal_recv(char* signal) {
     char temp[MAX_STR_LEN];
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; SIGNAL_RECV ; %s\n", 
+    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; SIGNAL_RECV ; %s", 
              get_proc_time(), getpid(), signal);
-    int fl = open(log_file->file_path, O_APPEND);
 
-    /* 
-     * Signal safe!
-     * Function might be called from a signal handler,
-     * however fwrite isn't listed in signal-safety(7)
-     */
-    if (write(fl, temp, strlen(temp) + 1) == -1)
-        exit(1);
+    if (log_info.available) {
+        int fl = open(log_info.file_path, O_WRONLY | O_APPEND);
 
-    close(fl);
+        /* 
+        * Signal safe!
+        * Function might be called from a signal handler,
+        * however fwrite isn't listed in signal-safety(7)
+        */
+        if (write(fl, temp, strlen(temp)) == -1) 
+            exit(1);
+
+        close(fl);
+    }
 }
