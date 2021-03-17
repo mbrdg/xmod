@@ -11,10 +11,11 @@ char* parse_file(const char* arg) {
 
     } else {
         /* exit error - cannot access error */
-        fprintf(stderr, "xmod: cannot access '%s': %s\n",
-                arg, strerror(errno));
-        fprintf(stderr, "failed to change mode of '%s' from 0000 (---------) to 0000 (---------)\n",
-                arg);
+        fprintf(stderr, "xmod: cannot access '%s': %s\n", arg, strerror(errno));
+
+        char mode_str[17] = "0000 (---------)";
+        fprintf(stderr, "failed to change mode of '%s' from %s to %s\n",
+                mode_str, mode_str, arg);
 
         if (log_info.available)
             proc_exit(getpid(), 1);
@@ -32,8 +33,8 @@ char* process_node(const char* parent, const char* child) {
     if (append_sep) {
         if (asprintf(&new_node, "%s%s", parent, child) < 0)
             goto invalid_allocation;
-            
-    } else { 
+
+    } else {
         if (asprintf(&new_node, "%s/%s", parent, child) < 0)
             goto invalid_allocation;
     }
@@ -42,7 +43,7 @@ char* process_node(const char* parent, const char* child) {
 
 invalid_allocation:
     fprintf(stderr, "xmod: unable to process directory tree\n");
-            
+
     if (log_info.available)
         proc_exit(getpid(), 1);
     exit(1);

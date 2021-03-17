@@ -3,50 +3,62 @@
 #define MAX_STR_LEN 1024
 #define TIME_INDEX 21
 
-// MIGHT NEED SOME REFACTORING
-static double get_proc_time() {
+/**
+ * @brief Function responsible to determine how long it took since
+ *        the process start until an Interruption occured
+ * 
+ * @return double time delta in milliseconds
+ */
+static double get_proc_time(void) {
     time_t all_time = 0l, proc_time = 0l;
     char temp[MAX_STR_LEN];
+    char* token;
 
     FILE* fp = fopen("/proc/stat", "r");
     while (fgets(temp, MAX_STR_LEN, fp) != NULL) {
         /* Getting btime - time since epoch to machine boot */
         if (strstr(temp, "btime") != NULL) {
-            char* token_1;
+            char* dummy_ptr = temp;  // Avoids compilation Warnings
 
-            token_1 = strtok(temp, " ");
-            token_1 = strtok(NULL, " ");
-            all_time = atoll(token_1);
+            token = strtok_r(temp, " ", &dummy_ptr);
+            token = strtok_r(NULL, " ", &dummy_ptr);
+
+            all_time = atoll(token);
         }
     }
-    
-    char proc_path[MAX_STR_LEN/4];
-    snprintf(proc_path, MAX_STR_LEN/4, "/proc/%d/stat", getpgid(getpid()));
+    fclose(fp);
+
+    char proc_path[32];
+    snprintf(proc_path, sizeof(proc_path), "/proc/%d/stat", getpgid(getpid()));
 
     FILE* fp_proc = fopen(proc_path, "r");
     if (fgets(temp, MAX_STR_LEN, fp_proc) != NULL) {
-        char* token_2;
+        char* dummy_ptr = temp;  // Avoids compilation Warnings
 
-        token_2 = strtok(temp, " ");
+        token = strtok_r(temp, " ", &dummy_ptr);
         for (int i = 0; i < TIME_INDEX; ++i)
-            token_2 = strtok(NULL, " ");
+            token = strtok_r(NULL, " ", &dummy_ptr);
 
-        proc_time = atoll(token_2);
+        proc_time = atoll(token);
     }
+    fclose(fp_proc);
 
     struct timespec time;
     clock_gettime(CLOCK_REALTIME, &time);
+
     /*
-     * time.tvsec + time.tvnsec * 10^-9 = tempo desde a Epoch (1970-1-1)
-     * all_time = tempo desde a época até ao momento em que ligamos a máquina
-     * time.tvsec - all_time = tempo desde que ligamos a máquina
-     * proc_time = tempo desde que a máquina ligou até o processo inicial
-     * subtração: tempo que passou desde que o processo começou
+     * time.tvsec + time.tvnsec * 10^-9: time since Epoch (1970-1-1)
+     * all_time: time from Epoch until system boot
+     * time.tvsec - all_time: time since system boot
+     * proc_time: time from boot until the starting of the initial process
+     * delta: time since process start in milliseconds
      */
-    return (double)((time.tv_sec + (time.tv_nsec*pow(10.0, -9.0)) - all_time) -
-                     (proc_time / sysconf(_SC_CLK_TCK)) ) * 1000;
+    return (double) ((time.tv_sec + (time.tv_nsec * pow(10, -9)) - all_time) -
+                    (proc_time / sysconf(_SC_CLK_TCK)) ) * 1000;
 }
 
+
+// -------------------- LOGS public module --------------------
 
 extern struct logs log_info;
 
@@ -55,7 +67,7 @@ void logs_setup(int argc, char *argv[]) {
     log_info.available = (getenv("LOG_FILENAME") != NULL);
 
     if (log_info.available) {
-        strncpy(log_info.file_path, getenv("LOG_FILENAME"), MAX_STR_LEN);
+        strncpy(log_info.file_path, getenv("LOG_FILENAME"), MAX_STR_LEN - 1);
 
         if (GROUP_LEADER) {
             char log_header[30] = " instant ; pid ; event ; info";
@@ -71,7 +83,7 @@ void logs_setup(int argc, char *argv[]) {
 }
 
 /* PROCESS CREATED */
-void proc_creat(int argc, char* argv[]) {    
+void proc_creat(int argc, char* argv[]) {
     char temp[MAX_STR_LEN];
     snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; PROC_CREAT ;",
              get_proc_time(), getpid());
@@ -93,9 +105,11 @@ void proc_creat(int argc, char* argv[]) {
 
 /* PROCESS TERMINATED */
 void proc_exit(pid_t pid, int status) {
-    signal_sent("SIGCHLD", getppid());        
+    /* Every proc must send a SICHILD telling his parent that is terminates */
+    signal_sent("SIGCHLD", getppid());
 
     char temp[MAX_STR_LEN];
+    /* Not signal safe but there's no other way to match xmod specification */
     snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; PROC_EXIT ; %d",
              get_proc_time(), pid, status);
 
@@ -121,6 +135,7 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
 
     old_mode &= 0777;
 
+    /* Not signal safe but there's no other way to match xmod specification */
     snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; FILE_MODF ; %s : %04o : %04o",
              get_proc_time(), pid, file_path, old_mode, new_mode);
 
@@ -136,9 +151,10 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
 /* Signal Sent */
 void signal_sent(char* signal, pid_t pid) {
     char temp[MAX_STR_LEN];
+    /* Not signal safe but there's no other way to match xmod specification */
     snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; SIGNAL_SENT ; %s : %d",
              get_proc_time(), getpid(), signal, pid);
-    
+
     if (log_info.available) {
         int fl = open(log_info.file_path, O_WRONLY | O_APPEND);
 
@@ -157,7 +173,8 @@ void signal_sent(char* signal, pid_t pid) {
 /* Signal Received */
 void signal_recv(char* signal) {
     char temp[MAX_STR_LEN];
-    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; SIGNAL_RECV ; %s", 
+    /* Not signal safe but there's no other way to match xmod specification */
+    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; SIGNAL_RECV ; %s",
              get_proc_time(), getpid(), signal);
 
     if (log_info.available) {
@@ -168,7 +185,7 @@ void signal_recv(char* signal) {
         * Function might be called from a signal handler,
         * however fwrite isn't listed in signal-safety(7)
         */
-        if (write(fl, temp, strlen(temp)) == -1) 
+        if (write(fl, temp, strlen(temp)) == -1)
             exit(1);
 
         close(fl);

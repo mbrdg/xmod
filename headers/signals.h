@@ -15,6 +15,6 @@
  * @brief Sets all the handlers required for signals
  * 
  */
-void setup_signals();
+void setup_signals(void);
 
 #endif  // HEADERS_SIGNALS_H_

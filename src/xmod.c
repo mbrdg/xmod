@@ -12,6 +12,8 @@
 #include "../headers/signals.h"
 #include "../headers/logs.h"
 
+/* GLOBALS */
+
 /* 
  * File struct that will containg LOG_FILENAME information if
  * the environment variable with the same name is set to a valid path.
@@ -39,9 +41,9 @@ int main(int argc, char *argv[]) {
         exit(1);
 
     } else {
-        struct options opt = { .changes = false, 
-                               .recursive = false, 
-                               .verbose = false 
+        struct options opt = { .changes = false,
+                               .recursive = false,
+                               .verbose = false
                             };
         mode_t new_mode = 0u;
         bool mode_parsed = false;
@@ -50,7 +52,7 @@ int main(int argc, char *argv[]) {
         int8_t md_ind = -1;
 
         for (size_t i = argc - 1; i >= 1; --i) {
-            if (argv[i][0] == '-' && argv[i][1] != 'r' && 
+            if (argv[i][0] == '-' && argv[i][1] != 'r' &&
                 argv[i][1] != 'w' && argv[i][1] != 'x') {
                 /* [OPTIONS] input parsing */
                 parse_options(&opt, argv[i]);
@@ -138,8 +140,8 @@ int main(int argc, char *argv[]) {
 
                                 /* Program image Replacing */
                                     execl(argv[0], argv[0], opt_str, argv[md_ind],
-                                          tmp_fl_path, NULL);
-                                
+                                          file_path, NULL);
+
                                 /* Only if something goes wrong with exec */
                                     if (log_info.available)
                                         proc_exit(getpid(), 127);
@@ -149,28 +151,36 @@ int main(int argc, char *argv[]) {
                                     wait(&pid);
                                     break;
                             }
-                            
+
                         } else {
                             nftot++;
                             chmod(tmp_fl_path, new_mode);
 
                             if (log_info.available)
                                 file_modf(tmp_fl_path, old_mode, new_mode, getpid());
-                            options_output(&opt, tmp_fl_path, 
+                            options_output(&opt, tmp_fl_path,
                                            &old_mode, &new_mode, false);
 
                             nfmod = (new_mode == old_mode) ? nfmod : nfmod + 1;
-                        } 
+                        }
                     }
+                    
                     free(tmp_fl_path);
                 }
+
                 closedir(directory);
 
             } else {
-                /* something failed in this point */
-                options_output(&opt, file_path, &old_mode, &new_mode, true);
+                /* 
+                 * In case we set the recursive mode and we just pass a FILE
+                 * every error message should be according to chmod but ENOTDIR
+                 */
+                if (errno != ENOTDIR)
+                    /* something failed in this point */
+                    options_output(&opt, file_path, &old_mode, &new_mode, true);
             }
         }
+
         free(file_path);
     }
 
