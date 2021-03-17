@@ -22,6 +22,6 @@ $(BUILD_DIR)/%.c.o: %.c
 .PHONY: clean
 
 clean:
-	rm -rf xmod $(BUILD_DIR)/$(SRC_DIR)/*.c.o *.log
+	rm -rf xmod $(BUILD_DIR)/* *.log
 
 MKDIR_P = mkdir -p
