@@ -2,13 +2,14 @@
 #define  HEADERS_FILE_H_
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <stdbool.h>
-#include <time.h>
+
+#include "../headers/logs.h"
 
 /**
  * @brief Tests the file or directory for opening checking if it is
@@ -19,14 +20,16 @@
  */
 char* parse_file(const char* arg);
 
-void proc_creat(FILE* log_path, char** argv, size_t n);
-
-void proc_exit(int pid, int status);
-
-void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, int pid);
-
-void signal_sent(char * signal, int pid);
-
-void signal_recv(char* signal);
+/**
+ * @brief Concatenates strings with the propuse of iterating to the next
+ *        FILE/DIR with their corresponding token and calloc'd
+ *        Input: parent: "folder1", child: "file1"
+ *        Output: "folder1/file1"
+ * 
+ * @param parent current iterated DIR
+ * @param child name of the nodes inside DIR
+ * @return char* concatenated string with node value
+ */
+char* process_node(const char* parent, const char* child);
 
 #endif  // HEADERS_FILE_H_

@@ -1,5 +1,7 @@
 #include "../headers/mode.h"
 
+extern struct logs log_info;
+
 /**
  * @brief Creates a mini-mask to apply to the different types of users
  *        (Example) Input: "a-rx", Output: "0b00000101".
@@ -7,8 +9,8 @@
  * @param mode Input string.
  * @return u_int8_t Mini-mask with the correspondig bits set to 1.
  */
-static u_int8_t permissions_set(const char* mode) {
-    u_int8_t mode_mask = 00u;
+static uint8_t permissions_set(const char* mode) {
+    uint8_t mode_mask = 0u;
 
     for (size_t i = 2; i < strlen(mode); ++i) {
         switch (mode[i]) {
@@ -25,7 +27,8 @@ static u_int8_t permissions_set(const char* mode) {
             default:
                 /* exit error - invalid premission */
                 fprintf(stderr, "xmod: invalid premission '%c'\n", mode[i]);
-                proc_exit(getpid(), 1);
+                if (log_info.available)
+                    proc_exit(&log_info, getpid(), 1);
                 exit(1);
         }
     }
@@ -48,17 +51,21 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
     if (strlen(mode) > MAX_STR_LENGTH || strlen(mode) < MIN_STR_LENGTH) {
         /* exit error - invalid MODE string size */
         fprintf(stderr, "xmod: invalid MODE string size\n");
-        proc_exit(getpid(), 1);
+
+        if (log_info.available)
+            proc_exit(&log_info, getpid(), 1);
         exit(1);
     }
     if (mode[1] != '-' && mode[1] != '=' && mode[1] != '+') {
         /* exit error - invalid MODE operand */
         fprintf(stderr, "xmod: invalid MODE operand '%c'\n", mode[1]);
-        proc_exit(getpid(), 1);
+
+        if (log_info.available)
+            proc_exit(&log_info, getpid(), 1);
         exit(1);
     }
     
-    u_int16_t mode_mask = permissions_set(mode);
+    uint16_t mode_mask = permissions_set(mode);
 
     struct stat file_mode;
     stat(file_path, &file_mode);
@@ -131,7 +138,9 @@ static mode_t parse_mode_octal(const char* mode) {
 invalid_octal_format:
     /* Invalid MODE-OCTAL string format */
     fprintf(stderr, "xmod: invalid MODE-OCTAL input format\n");
-    proc_exit(getpid(), 1);
+
+    if (log_info.available)
+        proc_exit(&log_info, getpid(), 1);
     exit(1);
 }
 
@@ -147,15 +156,17 @@ mode_t parse_mode(const char* mode, char* file_path) {
             return parse_mode_str(mode, file_path);
         case '+':
         case '-':
-        case '=':{
-            char temp[MAX_STR_LENGTH] = "a";
-            strcat(temp, mode);
+        case '=': {}
+            char temp[MAX_STR_LENGTH + 1] = "a";
+            strncat(temp, mode, MAX_STR_LENGTH);
             return parse_mode_str(temp, file_path);
-        }
+
         default:
             /* Invalid MODE string format */
             fprintf(stderr, "xmod: invalid MODE input format\n");
-            proc_exit(getpid(), 1);
+            
+            if (log_info.available)
+                proc_exit(&log_info, getpid(), 1);
             exit(1);
     }
 }
@@ -168,8 +179,6 @@ mode_t get_current_file_mode(const char* file_path) {
         /* exit error - cannot access FILE/DIR status error */
         fprintf(stderr, "xmod: cannot access '%s' status: %s\n",
                                     file_path, strerror(errno));
-        proc_exit(getpid(), errno);
-        //exit(errno);
     }
 
     return file_mode.st_mode;
