@@ -141,6 +141,7 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
 
     /* mask with only the last 4 digits of FILE/DIR permissions mode */
     old_mode &= 0777;
+    new_mode &= 0777;
 
     /* Not signal safe but there's no other way to match xmod specification */
     snprintf(temp, MAX_STR_LEN, "%4.2f ; %d ; FILE_MODF ; %s : %04o : %04o\n",

@@ -11,9 +11,8 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <sys/times.h>
-#include <math.h>
 
-#define GROUP_LEADER ( getpid() == getpgid( getpid() ) )
+#define GROUP_LEADER (getpid() == getpgid(getpid()))
 
 /**
  * @brief struct containg relevant information about program logs
