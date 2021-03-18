@@ -41,7 +41,7 @@ int parse_options(struct options* options, char* arg);
  * @param old_mode Previous set of file premissions.
  * @param new_mode New set of file premissions.
  */
-void options_output(const struct options* opt, const char* file_path, 
+void options_output(const struct options* opt, const char* file_path,
                     mode_t* old_mode, mode_t* new_mode, bool failure);
 
 /**
