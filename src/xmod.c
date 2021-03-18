@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     /* LOGS Setup */
     logs_setup(argc, argv);
     setup_signals();
-
+    
     if (argc < 3) {
         /* exit error - invalid number of arguments */
         fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");

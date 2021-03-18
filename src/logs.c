@@ -2,6 +2,17 @@
 
 #define MAX_STR_LEN 1024
 #define TIME_INDEX 21
+/**/
+int getST(struct timespec *dest) {
+    char proc_path[32];
+    snprintf(proc_path, sizeof(proc_path), "/proc/%d", getpgid(getpid()));
+    struct stat buf;
+    
+    if(stat(proc_path, &buf)==-1) return -1;
+    *dest=buf.st_atim;
+    return 0;
+}
+/**/
 
 /**
  * @brief Function responsible to determine how long it took since
@@ -59,7 +70,23 @@ static double get_proc_time(void) {
      * proc_time: time from boot until the starting of the initial process
      * delta: time since process start in milliseconds
      */
-    return ((time.tv_sec + (time.tv_nsec * 1e-9) - all_time) -
+    double x1=(double)proc_time / sysconf(_SC_CLK_TCK);
+    double x2=(double)all_time;
+    double x3=(double)time.tv_sec;
+    double x4=(double)(time.tv_nsec * 1e-9);
+    //printf("proc-%.5ld \n", proc_time / sysconf(_SC_CLK_TCK));
+    //printf("proc-var-%.5f\n", x1);
+    //printf("allti-%.5ld\n", all_time);
+    //printf("all-var-%.5f\n", x2);
+    //printf("time-%.5ld\n", time.tv_sec);
+    //printf("time-var-%.5f\n", x3);
+
+    struct timespec then;
+    getST(&then);
+    printf("result:%.5f\n", (x3+x4-x2-x1)*1e3);
+    printf("x-%.5f\n", (double)then.tv_sec);
+    printf("result2-%.5f\n", (double)(time.tv_sec-then.tv_sec)*1e3+(double)(time.tv_nsec-then.tv_nsec)*1e-6);
+    return (double)((time.tv_sec + (time.tv_nsec * 1e-9) - all_time) -
             ((double) proc_time / sysconf(_SC_CLK_TCK)) ) * 1e3;
 }
 
