@@ -70,22 +70,23 @@ void logs_setup(int argc, char *argv[]) {
         strncpy(log_info.file_path, getenv("LOG_FILENAME"), MAX_STR_LEN - 1);
 
         if (GROUP_LEADER) {
-            char log_header[30] = " instant ; pid ; event ; info";
+            char log_header[30] = " instant ; pid ; event ; info\n";
 
             /* LOG_FILENAME Truncation */
             log_info.fp = fopen(log_info.file_path, "w");
             fwrite(log_header, sizeof(char), strlen(log_header), log_info.fp);
             fclose(log_info.fp);
+
+            proc_creat(argc, argv);
         }
 
-        proc_creat(argc, argv);
     }
 }
 
 /* PROCESS CREATED */
 void proc_creat(int argc, char* argv[]) {
     char temp[MAX_STR_LEN];
-    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; PROC_CREAT ;",
+    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; PROC_CREAT ;",
              get_proc_time(), getpid());
 
     for (int i = 1; i < argc; ++i) {
@@ -100,6 +101,8 @@ void proc_creat(int argc, char* argv[]) {
         strlen(temp))
         exit(1);
 
+    fputs("\n", log_info.fp);
+
     fclose(log_info.fp);
 }
 
@@ -110,7 +113,7 @@ void proc_exit(pid_t pid, int status) {
 
     char temp[MAX_STR_LEN];
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; PROC_EXIT ; %d",
+    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; PROC_EXIT ; %d\n",
              get_proc_time(), pid, status);
 
     if (log_info.available) {
@@ -136,7 +139,7 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
     old_mode &= 0777;
 
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; FILE_MODF ; %s : %04o : %04o",
+    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; FILE_MODF ; %s : %04o : %04o\n",
              get_proc_time(), pid, file_path, old_mode, new_mode);
 
     /* To avoid compilation warnings, it's useless calling proc_exit() */
@@ -152,7 +155,7 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
 void signal_sent(char* signal, pid_t pid) {
     char temp[MAX_STR_LEN];
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; SIGNAL_SENT ; %s : %d",
+    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; SIGNAL_SENT ; %s : %d\n",
              get_proc_time(), getpid(), signal, pid);
 
     if (log_info.available) {
@@ -174,7 +177,7 @@ void signal_sent(char* signal, pid_t pid) {
 void signal_recv(char* signal) {
     char temp[MAX_STR_LEN];
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "\n%.5f ; %d ; SIGNAL_RECV ; %s",
+    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; SIGNAL_RECV ; %s\n",
              get_proc_time(), getpid(), signal);
 
     if (log_info.available) {

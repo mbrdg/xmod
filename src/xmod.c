@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
                 while ((dir = readdir(directory)) != NULL) {
 
                     char* tmp_fl_path = process_node(file_path, dir->d_name);
-                    stat(tmp_fl_path, &stat_buf);
+                    lstat(tmp_fl_path, &stat_buf);
 
                     if ((strcmp(dir->d_name, "..") != 0) &&
                         (strcmp(dir->d_name, ".") != 0)) {
@@ -138,6 +138,14 @@ int main(int argc, char *argv[]) {
                                     char opt_str[5];
                                     get_options_str(&opt, opt_str);
 
+                                    char* args[4];
+                                    args[0] = argv[0];
+                                    args[1] = opt_str;
+                                    args[2] = argv[md_ind];
+                                    args[3] = file_path;
+
+                                    proc_creat(argc, args);
+
                                 /* Program image Replacing */
                                     execl(argv[0], argv[0], opt_str, argv[md_ind],
                                           file_path, NULL);
@@ -152,7 +160,7 @@ int main(int argc, char *argv[]) {
                                     break;
                             }
 
-                        } else {
+                        } else if (S_ISREG(stat_buf.st_mode)) {
                             nftot++;
                             chmod(tmp_fl_path, new_mode);
 
@@ -162,6 +170,14 @@ int main(int argc, char *argv[]) {
                                            &old_mode, &new_mode, false);
 
                             nfmod = (new_mode == old_mode) ? nfmod : nfmod + 1;
+                        
+                        } else if (S_ISLNK(stat_buf.st_mode)) {
+                            /* Symbolic link has been found */
+                            nftot++;  
+                            fprintf(stdout, "neither symbolic link '%s' nor referent has been changed\n", tmp_fl_path);
+                        
+                        } else {
+                            //É suposto tratarmos mais algum tipo de ficheiros?
                         }
                     }
                     
