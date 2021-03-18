@@ -41,8 +41,8 @@ static void proc_info(void) {
 /* DEFAULT handler */
 static void sig_default_handler(int signal) {
     signal_recv(sig_name[signal]);
-    return;
 }
+
 /* SIGUSR1 handler */
 static void sigusr1_handler(int signal) {
     signal_recv(sig_name[signal]);
@@ -53,12 +53,15 @@ static void sigusr1_handler(int signal) {
         kill(getppid(), SIGCONT);
         pause();
     }
-    return;
 }
+
+#define NO_INPUT 1
+
 /* SIGINT handler */
 static void sigint_handler(int signal) {
-    char temp[MAX_STR_LEN];
     signal_recv(sig_name[signal]);
+
+    char temp[MAX_STR_LEN];
 
     if (GROUP_LEADER) {
         signal_sent(sig_name[SIGUSR1], getgid());
@@ -66,7 +69,7 @@ static void sigint_handler(int signal) {
         killpg(0, SIGUSR1);
         pause();
 
-        while (1) {
+        while (NO_INPUT) {
             char msg[48] = "\nDo you want to keep running the program [y/n] ";
 
             if (write(STDOUT_FILENO, msg, sizeof(msg)) == -1) {
@@ -88,15 +91,15 @@ static void sigint_handler(int signal) {
             } else if (strcmp(temp, "y") == 0) {
                 signal_sent(sig_name[SIGCONT], getgid());
                 killpg(0, SIGCONT);
-                return;
             }
         }
 
     } else {
         pause();
+
     }
-    return;
 }
+
 /* SIGTERM handler */
 static void sigterm_handler(int signal) {
     if (GROUP_LEADER)

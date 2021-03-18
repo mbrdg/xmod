@@ -104,60 +104,78 @@ int main(int argc, char *argv[]) {
                     char* tmp_fl_path = process_node(file_path, dir->d_name);
                     lstat(tmp_fl_path, &stat_buf);
 
-                    if ((strcmp(dir->d_name, "..") == 0) ||
-                        (strcmp(dir->d_name, ".") == 0)) {
-                            free(tmp_fl_path);
-                            continue;
-                    }
+                    if ((strcmp(dir->d_name, "..") != 0) &&
+                        (strcmp(dir->d_name, ".") != 0)) {
+                        new_mode = parse_mode(argv[md_ind], tmp_fl_path);
+                        old_mode = get_current_file_mode(tmp_fl_path);
 
-                    new_mode = parse_mode(argv[md_ind], tmp_fl_path);
-                    old_mode = get_current_file_mode(tmp_fl_path);
+                        if (S_ISDIR(stat_buf.st_mode)) {
+                            pid_t pid = fork();
 
-                    if (S_ISDIR(stat_buf.st_mode)) {
-                        pid_t pid = fork();
+                            switch (pid) {
+                                case -1:
+                                    if (log_info.available)
+                                        proc_exit(getpid(), 1);
+                                    exit(1);
 
-                        switch (pid) {
-                            case -1:
-                                if (log_info.available)
-                                    proc_exit(getpid(), 1);
-                                exit(1);
+                                case 0:
 
-                            case 0:
-                            /*
-                             * Perhaps not the best practice but the new
-                             * process must have its own directory so we
-                             * assign file_path to point to the same string
-                             * built by the parent and that is a sub-folder
-                             */  
-                                file_path = tmp_fl_path;
+                                /*
+                                 * Perhaps not the best practice but the new
+                                 * process must have its own directory so we
+                                 * assign file_path to point to the same string
+                                 * built by the parent and that is a sub-folder
+                                 */  
+                                    file_path = tmp_fl_path;
 
-                            /* Child must not count parent's files */
-                                nftot = 1u;
-                                nfmod = 0u;
+                                /* Child must not count parent's files */
+                                    nftot = 1u;
+                                    nfmod = 0u;
 
-                            /* 5 is the max allowed for OPTION args */
-                                char opt_str[5];
-                                get_options_str(&opt, opt_str);
+                                /* 5 is the max allowed for OPTION args */
+                                    char opt_str[5];
+                                    get_options_str(&opt, opt_str);
 
-                                char* args[4];
-                                args[0] = argv[0];
-                                args[1] = opt_str;
-                                args[2] = argv[md_ind];
-                                args[3] = file_path;
+                                    char* args[4];
+                                    args[0] = argv[0];
+                                    args[1] = opt_str;
+                                    args[2] = argv[md_ind];
+                                    args[3] = file_path;
 
-                                proc_creat(argc, args);
+                                    proc_creat(argc, args);
 
-                            /* Program image Replacing */
-                                execl(argv[0], argv[0], opt_str,
-                                        argv[md_ind], file_path, NULL);
+                                /* Program image Replacing */
+                                    execl(argv[0], argv[0], opt_str, argv[md_ind],
+                                          file_path, NULL);
 
-                            /* Only if something goes wrong with exec */
-                                if (log_info.available)
-                                    proc_exit(getpid(), 127);
-                                exit(127);
+                                /* Only if something goes wrong with exec */
+                                    if (log_info.available)
+                                        proc_exit(getpid(), 127);
+                                    exit(127);
 
-                            default:
-                                break;
+                                default:
+                                    wait(&pid);
+                                    break;
+                            }
+
+                        } else if (S_ISREG(stat_buf.st_mode)) {
+                            nftot++;
+                            chmod(tmp_fl_path, new_mode);
+
+                            if (log_info.available)
+                                file_modf(tmp_fl_path, old_mode, new_mode, getpid());
+                            options_output(&opt, tmp_fl_path,
+                                           &old_mode, &new_mode, false);
+
+                            nfmod = (new_mode == old_mode) ? nfmod : nfmod + 1;
+                        
+                        } else if (S_ISLNK(stat_buf.st_mode)) {
+                            /* Symbolic link has been found */
+                            nftot++;  
+                            fprintf(stdout, "neither symbolic link '%s' nor referent has been changed\n", tmp_fl_path);
+                        
+                        } else {
+                            nftot++
                         }
 
                     } else if (S_ISREG(stat_buf.st_mode)) {

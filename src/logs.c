@@ -11,16 +11,20 @@
  */
 static double get_proc_time(void) {
     time_t all_time = 0l, proc_time = 0l;
+
     char temp[MAX_STR_LEN];
     char* token;
 
-    FILE* fp = fopen("/proc/stat", "r");
+    FILE* fp;
+    if ((fp = fopen("/proc/stat", "r")) == NULL)
+        exit(1);
+
     while (fgets(temp, MAX_STR_LEN, fp) != NULL) {
         /* Getting btime - time since epoch to machine boot */
         if (strstr(temp, "btime") != NULL) {
             char* dummy_ptr = temp;  // Avoids compilation Warnings
 
-            token = strtok_r(temp, " ", &dummy_ptr);
+            strtok_r(temp, " ", &dummy_ptr);
             token = strtok_r(NULL, " ", &dummy_ptr);
 
             all_time = atoll(token);
@@ -31,17 +35,19 @@ static double get_proc_time(void) {
     char proc_path[32];
     snprintf(proc_path, sizeof(proc_path), "/proc/%d/stat", getpgid(getpid()));
 
-    FILE* fp_proc = fopen(proc_path, "r");
-    if (fgets(temp, MAX_STR_LEN, fp_proc) != NULL) {
+    if ((fp = fopen(proc_path, "r")) == NULL)
+        exit(1);
+
+    if (fgets(temp, MAX_STR_LEN, fp) != NULL) {
         char* dummy_ptr = temp;  // Avoids compilation Warnings
 
         token = strtok_r(temp, " ", &dummy_ptr);
-        for (int i = 0; i < TIME_INDEX; ++i)
+        for (int32_t i = 0; i < TIME_INDEX; ++i)
             token = strtok_r(NULL, " ", &dummy_ptr);
 
         proc_time = atoll(token);
     }
-    fclose(fp_proc);
+    fclose(fp);
 
     struct timespec time;
     clock_gettime(CLOCK_REALTIME, &time);
@@ -53,8 +59,8 @@ static double get_proc_time(void) {
      * proc_time: time from boot until the starting of the initial process
      * delta: time since process start in milliseconds
      */
-    return (double) ((time.tv_sec + (time.tv_nsec * pow(10, -9)) - all_time) -
-                    (proc_time / sysconf(_SC_CLK_TCK)) ) * 1000;
+    return ((time.tv_sec + (time.tv_nsec * 1e-9) - all_time) -
+            ((double) proc_time / sysconf(_SC_CLK_TCK)) ) * 1e3;
 }
 
 
@@ -76,32 +82,29 @@ void logs_setup(int argc, char *argv[]) {
             log_info.fp = fopen(log_info.file_path, "w");
             fwrite(log_header, sizeof(char), strlen(log_header), log_info.fp);
             fclose(log_info.fp);
-
-            proc_creat(argc, argv);
         }
 
+        proc_creat(argc, argv);
     }
 }
 
 /* PROCESS CREATED */
 void proc_creat(int argc, char* argv[]) {
     char temp[MAX_STR_LEN];
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; PROC_CREAT ;",
+    snprintf(temp, MAX_STR_LEN, "%4.2f ; %d ; PROC_CREAT ;",
              get_proc_time(), getpid());
 
-    for (int i = 1; i < argc; ++i) {
+    for (int32_t i = 1; i < argc; ++i) {
         strncat(temp, " ", 2);
         strncat(temp, argv[i], MAX_STR_LEN - strlen(temp));
     }
+    strncat(temp, "\n", 2);
 
     log_info.fp = fopen(log_info.file_path, "a");
 
     /* To avoid compilation warnings, it's useless calling proc_exit() */
-    if (fwrite(temp, sizeof(char), strlen(temp), log_info.fp) <
-        strlen(temp))
+    if (fwrite(temp, sizeof(char), strlen(temp), log_info.fp) < strlen(temp))
         exit(1);
-
-    fputs("\n", log_info.fp);
 
     fclose(log_info.fp);
 }
@@ -113,11 +116,11 @@ void proc_exit(pid_t pid, int status) {
 
     char temp[MAX_STR_LEN];
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; PROC_EXIT ; %d\n",
+    snprintf(temp, MAX_STR_LEN, "%4.2f ; %d ; PROC_EXIT ; %d\n",
              get_proc_time(), pid, status);
 
     if (log_info.available) {
-        int fl = open(log_info.file_path, O_WRONLY | O_APPEND);
+        int32_t fl = open(log_info.file_path, O_WRONLY | O_APPEND);
 
         /* 
         * Signal safe!
@@ -136,15 +139,15 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
     log_info.fp = fopen(log_info.file_path, "a");
     char temp[MAX_STR_LEN];
 
+    /* mask with only the last 4 digits of FILE/DIR permissions mode */
     old_mode &= 0777;
 
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; FILE_MODF ; %s : %04o : %04o\n",
+    snprintf(temp, MAX_STR_LEN, "%4.2f ; %d ; FILE_MODF ; %s : %04o : %04o\n",
              get_proc_time(), pid, file_path, old_mode, new_mode);
 
     /* To avoid compilation warnings, it's useless calling proc_exit() */
-    if (fwrite(temp, sizeof(char), strlen(temp), log_info.fp) <
-        strlen(temp))
+    if (fwrite(temp, sizeof(char), strlen(temp), log_info.fp) < strlen(temp))
         exit(1);
 
     fclose(log_info.fp);
@@ -155,11 +158,11 @@ void file_modf(char* file_path, mode_t old_mode, mode_t new_mode, pid_t pid) {
 void signal_sent(char* signal, pid_t pid) {
     char temp[MAX_STR_LEN];
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; SIGNAL_SENT ; %s : %d\n",
+    snprintf(temp, MAX_STR_LEN, "%4.2f ; %d ; SIGNAL_SENT ; %s : %d\n",
              get_proc_time(), getpid(), signal, pid);
 
     if (log_info.available) {
-        int fl = open(log_info.file_path, O_WRONLY | O_APPEND);
+        int32_t fl = open(log_info.file_path, O_WRONLY | O_APPEND);
 
         /* 
         * Signal safe!
@@ -177,11 +180,11 @@ void signal_sent(char* signal, pid_t pid) {
 void signal_recv(char* signal) {
     char temp[MAX_STR_LEN];
     /* Not signal safe but there's no other way to match xmod specification */
-    snprintf(temp, MAX_STR_LEN, "%.5f ; %d ; SIGNAL_RECV ; %s\n",
+    snprintf(temp, MAX_STR_LEN, "%4.2f ; %d ; SIGNAL_RECV ; %s\n",
              get_proc_time(), getpid(), signal);
 
     if (log_info.available) {
-        int fl = open(log_info.file_path, O_WRONLY | O_APPEND);
+        int32_t fl = open(log_info.file_path, O_WRONLY | O_APPEND);
 
         /* 
         * Signal safe!
