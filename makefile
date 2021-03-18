@@ -2,7 +2,7 @@ CC=gcc
 
 # If you wish, comment the last two flags
 # However, the remainder is to always resolve the compiler warnings
-CFLAGS=-g -Wall -Wextra -pedantic -D _GNU_SOURCE -O2 -Werror
+CFLAGS=-g -Wall -Wextra -pedantic -D _GNU_SOURCE -Werror -O2
 
 BUILD_DIR = ./build
 SRC_DIR = ./src
@@ -22,6 +22,6 @@ $(BUILD_DIR)/%.c.o: %.c
 .PHONY: clean
 
 clean:
-	rm -rf xmod $(BUILD_DIR)/$(SRC_DIR)/*.c.o 
+	rm -rf xmod $(BUILD_DIR)/* *.log
 
 MKDIR_P = mkdir -p

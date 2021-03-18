@@ -36,6 +36,7 @@
 *.i*86
 *.x86_64
 *.hex
+*.sh
 
 # Debug files
 *.dSYM/
@@ -54,3 +55,6 @@ dkms.conf
 
 # Settings
 *.vscode
+
+# Static Analysis
+infer-out

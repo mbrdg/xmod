@@ -3,13 +3,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
 
-#include "file.h"
+#include "../headers/logs.h"
 
 /**
  * @brief Processes the argument string passed through the command line

@@ -1,5 +1,7 @@
 #include "../headers/mode.h"
 
+extern struct logs log_info;
+
 /**
  * @brief Creates a mini-mask to apply to the different types of users
  *        (Example) Input: "a-rx", Output: "0b00000101".
@@ -7,8 +9,8 @@
  * @param mode Input string.
  * @return u_int8_t Mini-mask with the correspondig bits set to 1.
  */
-static u_int8_t permissions_set(const char* mode) {
-    u_int8_t mode_mask = 00u;
+static uint8_t permissions_set(const char* mode) {
+    uint8_t mode_mask = 0u;
 
     for (size_t i = 2; i < strlen(mode); ++i) {
         switch (mode[i]) {
@@ -25,7 +27,8 @@ static u_int8_t permissions_set(const char* mode) {
             default:
                 /* exit error - invalid premission */
                 fprintf(stderr, "xmod: invalid premission '%c'\n", mode[i]);
-                proc_exit(getpid(), 1);
+                if (log_info.available)
+                    proc_exit(getpid(), 1);
                 exit(1);
         }
     }
@@ -33,8 +36,8 @@ static u_int8_t permissions_set(const char* mode) {
     return mode_mask;
 }
 
-#define MAX_STR_LENGTH 5
-#define MIN_STR_LENGTH 3
+#define MAX_STR_LEN 5
+#define MIN_STR_LEN 3
 /**
  * @brief Parses the new mode for file/directory passed as a normal string 
  *        format.
@@ -45,20 +48,24 @@ static u_int8_t permissions_set(const char* mode) {
  * @return mode_t new mode set of premissions for the input file(s).
  */
 static mode_t parse_mode_str(const char* mode, char* file_path) {
-    if (strlen(mode) > MAX_STR_LENGTH || strlen(mode) < MIN_STR_LENGTH) {
+    if (strlen(mode) > MAX_STR_LEN || strlen(mode) < MIN_STR_LEN) {
         /* exit error - invalid MODE string size */
         fprintf(stderr, "xmod: invalid MODE string size\n");
-        proc_exit(getpid(), 1);
+
+        if (log_info.available)
+            proc_exit(getpid(), 1);
         exit(1);
     }
     if (mode[1] != '-' && mode[1] != '=' && mode[1] != '+') {
         /* exit error - invalid MODE operand */
         fprintf(stderr, "xmod: invalid MODE operand '%c'\n", mode[1]);
-        proc_exit(getpid(), 1);
+
+        if (log_info.available)
+            proc_exit(getpid(), 1);
         exit(1);
     }
-    
-    u_int16_t mode_mask = permissions_set(mode);
+
+    uint16_t mode_mask = permissions_set(mode);
 
     struct stat file_mode;
     stat(file_path, &file_mode);
@@ -83,7 +90,7 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
             mode_mask = (mode_mask << 6) | (mode_mask << 3) | mode_mask;
             break;
     }
-    
+
     if (mode[1] == '+') {
         mode_mask |= file_mode.st_mode;
 
@@ -97,7 +104,7 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
          */
         for (int8_t i = 2; i >= 0; --i) {
             mode_t temp = 07u;
-            
+
             if ((mode_mask & (7u << i*3)) == 0) {
                 temp <<= i*3;
                 temp &= file_mode.st_mode;
@@ -108,7 +115,7 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
     return (mode_t) mode_mask;
 }
 
-#define OCTAL_LENGHT 4
+#define OCT_LEN 4
 /**
  * @brief Parses the new mode for FILE/DIR passed as an octal string format.
  * 
@@ -116,11 +123,11 @@ static mode_t parse_mode_str(const char* mode, char* file_path) {
  * @return mode_t new mode set of premissions for the input FILE/DIR.
  */
 static mode_t parse_mode_octal(const char* mode) {
-    if(strlen(mode) != OCTAL_LENGHT) {
+    if (strlen(mode) != OCT_LEN) {
         goto invalid_octal_format;
     }
 
-    for (size_t i = 1; i < OCTAL_LENGHT; ++i) {
+    for (size_t i = 1; i < OCT_LEN; ++i) {
         if (!isdigit(mode[i]) || mode[i] >= '8') {
             goto invalid_octal_format;
         }
@@ -131,7 +138,9 @@ static mode_t parse_mode_octal(const char* mode) {
 invalid_octal_format:
     /* Invalid MODE-OCTAL string format */
     fprintf(stderr, "xmod: invalid MODE-OCTAL input format\n");
-    proc_exit(getpid(), 1);
+
+    if (log_info.available)
+        proc_exit(getpid(), 1);
     exit(1);
 }
 
@@ -147,15 +156,17 @@ mode_t parse_mode(const char* mode, char* file_path) {
             return parse_mode_str(mode, file_path);
         case '+':
         case '-':
-        case '=':{
-            char temp[MAX_STR_LENGTH] = "a";
-            strcat(temp, mode);
+        case '=': {}
+            char temp[MAX_STR_LEN + 1] = "a";
+            strncat(temp, mode, MAX_STR_LEN);
             return parse_mode_str(temp, file_path);
-        }
+
         default:
             /* Invalid MODE string format */
             fprintf(stderr, "xmod: invalid MODE input format\n");
-            proc_exit(getpid(), 1);
+
+            if (log_info.available)
+                proc_exit(getpid(), 1);
             exit(1);
     }
 }
@@ -167,9 +178,7 @@ mode_t get_current_file_mode(const char* file_path) {
     if (stat(file_path, &file_mode) == -1) {
         /* exit error - cannot access FILE/DIR status error */
         fprintf(stderr, "xmod: cannot access '%s' status: %s\n",
-                                    file_path, strerror(errno));
-        proc_exit(getpid(), errno);
-        //exit(errno);
+                file_path, strerror(errno));
     }
 
     return file_mode.st_mode;

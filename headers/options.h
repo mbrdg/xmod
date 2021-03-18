@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#include "file.h"
+#include "../headers/logs.h"
 
 
 /**
@@ -41,7 +41,15 @@ int parse_options(struct options* options, char* arg);
  * @param old_mode Previous set of file premissions.
  * @param new_mode New set of file premissions.
  */
-void options_output(const struct options* opt, const char* file_path, 
-                    mode_t* old_mode, mode_t* new_mode, bool error);
+void options_output(const struct options* opt, const char* file_path,
+                    mode_t* old_mode, mode_t* new_mode, bool failure);
+
+/**
+ * @brief Get the OPTIONS string
+ * 
+ * @param opt Set of flags passed as input by the command line.
+ * @param arg string filled with the set of options
+ */
+void get_options_str(const struct options* opt, char* arg);
 
 #endif  // HEADERS_OPTIONS_H_
