@@ -23,6 +23,8 @@ char* file_path;  /* Path to the current processed file */
 uint32_t nftot = 1u;  /* No. Found Files */
 uint32_t nfmod = 0u;  /* No. Modified Files */
 
+bool last_child_dead = false;
+
 int main(int argc, char *argv[]) {
     /* LOGS Setup */
     logs_setup(argc, argv);
@@ -84,6 +86,7 @@ int main(int argc, char *argv[]) {
          * output - that chmod changes the FILE/DIR before calling fork()
          * to handle sub-folders within the recursive approach.
         */
+        usleep(500000);
         mode_t old_mode = get_current_file_mode(file_path);
         chmod(file_path, new_mode);
 
@@ -158,7 +161,8 @@ int main(int argc, char *argv[]) {
 
                             default:
                                 wait(&pid);
-                                break;
+                                if(GROUP_LEADER) last_child_dead = true;
+                                if(GROUP_LEADER) pause();
                         }
 
                     } else if (S_ISREG(stat_buf.st_mode)) {
@@ -183,7 +187,6 @@ int main(int argc, char *argv[]) {
                     nftot += 1;
                     free(tmp_fl_path);
                 }
-
                 closedir(directory);
 
             } else {

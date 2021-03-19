@@ -7,7 +7,9 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <wait.h>
+#include <stdbool.h>
 
 #include "../include/logs.h"
 

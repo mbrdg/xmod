@@ -1,5 +1,7 @@
 #include "../include/signals.h"
 
+extern bool last_child_dead;
+
 char* sig_name[] = {
                     "INVALID", "SIGHUP", "SIGINT", "SIGQUIT", "SIGILL",
                     "SIGTRAP", "SIGABRT", "SIGBUS", "SIGFPE", "SIGKILL",
@@ -67,17 +69,15 @@ static void sigint_handler(int signal) {
         signal_sent(sig_name[SIGUSR1], getgid());
         proc_info();
         killpg(0, SIGUSR1);
-        pause();
-
+        if(!last_child_dead) pause();
+        usleep(100000);
         while (NO_INPUT) {
             char msg[48] = "\nDo you want to keep running the program [y/n] ";
-
             if (write(STDOUT_FILENO, msg, sizeof(msg)) == -1) {
                 if (log_info.available)
                     proc_exit(getpid(), 1);
                 exit(1);
             }
-
             if (scanf("%s", temp) == EOF) {
                 if (log_info.available)
                     proc_exit(getpid(), 1);
@@ -91,9 +91,9 @@ static void sigint_handler(int signal) {
             } else if (strcmp(temp, "y") == 0) {
                 signal_sent(sig_name[SIGCONT], getgid());
                 killpg(0, SIGCONT);
+                break;
             }
         }
-
     } else {
         pause();
     }
