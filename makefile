@@ -1,7 +1,6 @@
 CC=gcc
 
-# If you wish, comment the last two flags
-# However, the remainder is to always resolve the compiler warnings
+# Remainder to always resolve the compiler warnings
 CFLAGS=-g -Wall -Wextra -Werror -pedantic -D _GNU_SOURCE -O2
 
 BUILD_DIR = ./build
