@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 
                     char* tmp_fl_path = process_node(file_path, dir->d_name);
                     lstat(tmp_fl_path, &stat_buf);
-
+                    
                     new_mode = parse_mode(argv[md_ind], tmp_fl_path);
                     old_mode = get_current_file_mode(tmp_fl_path);
 
@@ -141,8 +141,9 @@ int main(int argc, char *argv[]) {
                                 args[1] = opt_str;
                                 args[2] = argv[md_ind];
                                 args[3] = file_path;
-
+                                
                             /* Hard Coded due to possible repeated args */
+                           if (log_info.available)
                                 proc_creat(4, args);
 
                             /* Program image Replacing */
