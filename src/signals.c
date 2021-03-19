@@ -1,7 +1,5 @@
 #include "../include/signals.h"
 
-extern bool last_child_dead;
-
 char* sig_name[] = {
                     "INVALID", "SIGHUP", "SIGINT", "SIGQUIT", "SIGILL",
                     "SIGTRAP", "SIGABRT", "SIGBUS", "SIGFPE", "SIGKILL",
@@ -17,6 +15,8 @@ extern uint32_t nfmod;
 
 extern struct logs log_info;
 extern char* file_path;
+
+extern bool last_child_dead;
 
 #define MAX_STR_LEN 1024
 
@@ -69,8 +69,14 @@ static void sigint_handler(int signal) {
         signal_sent(sig_name[SIGUSR1], getgid());
         proc_info();
         killpg(0, SIGUSR1);
-        if(!last_child_dead) pause();
-        usleep(100000);
+
+        /* Group leader only waits if any child is still alive */
+        if (!last_child_dead)
+            pause();
+
+        /* Give some margin to scanf buffering */
+        usleep(1e5);
+
         while (NO_INPUT) {
             char msg[48] = "\nDo you want to keep running the program [y/n] ";
             if (write(STDOUT_FILENO, msg, sizeof(msg)) == -1) {
@@ -94,6 +100,7 @@ static void sigint_handler(int signal) {
                 break;
             }
         }
+
     } else {
         pause();
     }
