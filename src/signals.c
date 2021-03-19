@@ -96,7 +96,6 @@ static void sigint_handler(int signal) {
 
     } else {
         pause();
-
     }
 }
 

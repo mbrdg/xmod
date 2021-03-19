@@ -59,7 +59,7 @@ static double get_proc_time(void) {
      * proc_time: time from boot until the starting of the initial process
      * delta: time since process start in milliseconds
      */
-    
+
     return ((time.tv_sec + (time.tv_nsec * 1e-9) - all_time) -
             ((double) proc_time / sysconf(_SC_CLK_TCK)) ) * 1e3;
 }
@@ -81,7 +81,7 @@ void logs_setup(int argc, char *argv[]) {
 
             /* LOG_FILENAME Truncation */
             log_info.fp = fopen(log_info.file_path, "w");
-            fwrite(log_header, sizeof(char), strlen(log_header), log_info.fp);
+            fwrite(log_header, sizeof(char), sizeof(log_header), log_info.fp);
             fclose(log_info.fp);
         }
 

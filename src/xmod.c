@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     /* LOGS Setup */
     logs_setup(argc, argv);
     setup_signals();
-    
+
     if (argc < 3) {
         /* exit error - invalid number of arguments */
         fprintf(stderr, "Usage: xmod [OPTIONS] MODE FILE/DIR\n");
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 
                     char* tmp_fl_path = process_node(file_path, dir->d_name);
                     lstat(tmp_fl_path, &stat_buf);
-                    
+
                     new_mode = parse_mode(argv[md_ind], tmp_fl_path);
                     old_mode = get_current_file_mode(tmp_fl_path);
 
@@ -136,15 +136,16 @@ int main(int argc, char *argv[]) {
                                 char opt_str[5];
                                 get_options_str(&opt, opt_str);
 
+                           if (log_info.available) {
                                 char* args[4];
                                 args[0] = argv[0];
                                 args[1] = opt_str;
                                 args[2] = argv[md_ind];
                                 args[3] = file_path;
-                                
+
                             /* Hard Coded due to possible repeated args */
-                           if (log_info.available)
                                 proc_creat(4, args);
+                            }
 
                             /* Program image Replacing */
                                 execl(argv[0], argv[0], opt_str,
@@ -177,7 +178,6 @@ int main(int argc, char *argv[]) {
                         fprintf(stdout,
                 "neither symbolic link '%s' nor referent has been changed\n",
                                 tmp_fl_path);
-
                     }
 
                     nftot += 1;
