@@ -13,6 +13,7 @@
 #include <sys/times.h>
 
 #define GROUP_LEADER (getpid() == getpgid(getpid()))
+#define GROUP_ID (getpgid(getpid()))
 
 /**
  * @brief struct containg relevant information about program logs

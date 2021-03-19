@@ -10,37 +10,24 @@
  * @return double time delta in milliseconds
  */
 static double get_proc_time(void) {
-    time_t all_time = 0l, proc_time = 0l;
-
+    time_t proc_time = 0ull;
     char temp[MAX_STR_LEN];
     char* token;
 
-    FILE* fp;
-    if ((fp = fopen("/proc/stat", "r")) == NULL)
-        exit(1);
-
-    while (fgets(temp, MAX_STR_LEN, fp) != NULL) {
-        /* Getting btime - time since epoch to machine boot */
-        if (strstr(temp, "btime") != NULL) {
-            char* dummy_ptr = temp;  // Avoids compilation Warnings
-
-            strtok_r(temp, " ", &dummy_ptr);
-            token = strtok_r(NULL, " ", &dummy_ptr);
-
-            all_time = atoll(token);
-        }
-    }
-    fclose(fp);
-
     char proc_path[32];
-    snprintf(proc_path, sizeof(proc_path), "/proc/%d/stat", getpgid(getpid()));
+    snprintf(proc_path, sizeof(proc_path), "/proc/%d/stat", GROUP_ID);
 
+    FILE* fp;
     if ((fp = fopen(proc_path, "r")) == NULL)
         exit(1);
 
     if (fgets(temp, MAX_STR_LEN, fp) != NULL) {
         char* dummy_ptr = temp;  // Avoids compilation Warnings
 
+        /* 
+         * strtok_r has some known bugs, however none 
+         * of them matter here, hence the use!
+         */
         token = strtok_r(temp, " ", &dummy_ptr);
         for (int32_t i = 0; i < TIME_INDEX; ++i)
             token = strtok_r(NULL, " ", &dummy_ptr);
@@ -49,19 +36,17 @@ static double get_proc_time(void) {
     }
     fclose(fp);
 
+    /* Works like charme, time since system boot */
     struct timespec time;
-    clock_gettime(CLOCK_REALTIME, &time);
+    clock_gettime(CLOCK_BOOTTIME, &time);
 
     /*
-     * time.tvsec + time.tvnsec * 10^-9: time since Epoch (1970-1-1)
-     * all_time: time from Epoch until system boot
-     * time.tvsec - all_time: time since system boot
-     * proc_time: time from boot until the starting of the initial process
-     * delta: time since process start in milliseconds
+     * time.tvsec + time.tvnsec * 1e-9: time since system boot
+     * proc_time: time since the beggining of the group process leader exec
+     * delta: instant of time for an event
      */
-
-    return ((time.tv_sec + (time.tv_nsec * 1e-9) - all_time) -
-            ((double) proc_time / sysconf(_SC_CLK_TCK)) ) * 1e3;
+    return (time.tv_sec + (time.tv_nsec * 1e-9) -
+           (double) proc_time / sysconf(_SC_CLK_TCK)) * 1e3;
 }
 
 
