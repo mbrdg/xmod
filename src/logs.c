@@ -70,9 +70,9 @@ void logs_setup(int argc, char *argv[]) {
             log_info.fp = fopen(log_info.file_path, "w");
             fwrite(log_header, sizeof(char), sizeof(log_header), log_info.fp);
             fclose(log_info.fp);
-        }
 
-        proc_creat(argc, argv);
+            proc_creat(argc, argv);
+        }
     }
 }
 
