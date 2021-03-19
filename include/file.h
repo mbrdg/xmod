@@ -1,5 +1,5 @@
-#ifndef  HEADERS_FILE_H_
-#define  HEADERS_FILE_H_
+#ifndef  FILE_H_
+#define  FILE_H_
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-#include "../headers/logs.h"
+#include "../include/logs.h"
 
 /**
  * @brief Tests the file or directory for opening checking if it is
@@ -32,4 +32,4 @@ char* parse_file(const char* arg);
  */
 char* process_node(const char* parent, const char* child);
 
-#endif  // HEADERS_FILE_H_
+#endif  // FILE_H_

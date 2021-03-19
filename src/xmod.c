@@ -5,11 +5,11 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include "../headers/options.h"
-#include "../headers/mode.h"
-#include "../headers/file.h"
-#include "../headers/signals.h"
-#include "../headers/logs.h"
+#include "../include/options.h"
+#include "../include/mode.h"
+#include "../include/file.h"
+#include "../include/signals.h"
+#include "../include/logs.h"
 
 /* GLOBALS */
 

@@ -1,4 +1,4 @@
-#include "../headers/mode.h"
+#include "../include/mode.h"
 
 extern struct logs log_info;
 
@@ -36,7 +36,9 @@ static uint8_t permissions_set(const char* mode) {
     return mode_mask;
 }
 
+#undef MAX_STR_LEN
 #define MAX_STR_LEN 5
+
 #define MIN_STR_LEN 3
 /**
  * @brief Parses the new mode for file/directory passed as a normal string 

@@ -1,6 +1,8 @@
-#include "../headers/logs.h"
+#include "../include/logs.h"
 
+#undef MAX_STR_LEN
 #define MAX_STR_LEN 1024
+
 #define TIME_INDEX 21
 
 /**

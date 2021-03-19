@@ -1,5 +1,5 @@
-#ifndef  HEADERS_OPTIONS_H_
-#define  HEADERS_OPTIONS_H_
+#ifndef  OPTIONS_H_
+#define  OPTIONS_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#include "../headers/logs.h"
+#include "../include/logs.h"
 
 
 /**
@@ -52,4 +52,4 @@ void options_output(const struct options* opt, const char* file_path,
  */
 void get_options_str(const struct options* opt, char* arg);
 
-#endif  // HEADERS_OPTIONS_H_
+#endif  // OPTIONS_H_

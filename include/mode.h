@@ -1,5 +1,5 @@
-#ifndef  HEADERS_MODE_H_
-#define  HEADERS_MODE_H_
+#ifndef  MODE_H_
+#define  MODE_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#include "../headers/logs.h"
+#include "../include/logs.h"
 
 /**
  * @brief Processes the argument string passed through the command line
@@ -34,4 +34,4 @@ mode_t parse_mode(const char* mode, char* file_path);
  */
 mode_t get_current_file_mode(const char* file_path);
 
-#endif  // HEADERS_MODE_H_
+#endif  // MODE_H_

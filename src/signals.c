@@ -1,4 +1,4 @@
-#include "../headers/signals.h"
+#include "../include/signals.h"
 
 char* sig_name[] = {
                     "INVALID", "SIGHUP", "SIGINT", "SIGQUIT", "SIGILL",
